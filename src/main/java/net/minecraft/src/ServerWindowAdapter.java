@@ -26,7 +26,7 @@ final class ServerWindowAdapter extends WindowAdapter
             }
             catch(InterruptedException interruptedexception)
             {
-                interruptedexception.printStackTrace();
+                ExceptionLogger.log(interruptedexception);
             }
         }
         System.exit(0);

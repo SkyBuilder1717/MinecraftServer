@@ -127,7 +127,7 @@ public class NetworkManager
 
     private void onNetworkError(Exception exception)
     {
-        exception.printStackTrace();
+        ExceptionLogger.log(exception);
         networkShutdown((new StringBuilder()).append("Internal exception: ").append(exception.toString()).toString());
     }
 

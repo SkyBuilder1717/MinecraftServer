@@ -15,7 +15,7 @@ public class WorldServer extends World
         super(file, s, (new Random()).nextLong(), WorldProvider.func_4091_a(i));
         field_819_z = false;
         field_6159_E = new MCHashTable();
-        field_6160_D = minecraftserver;
+        mcServer = minecraftserver;
     }
 
     public void tick()
@@ -25,7 +25,7 @@ public class WorldServer extends World
 
     public void func_4074_a(Entity entity, boolean flag)
     {
-        if(!field_6160_D.noAnimals && (entity instanceof EntityAnimals))
+        if(!mcServer.noAnimals && (entity instanceof EntityAnimals))
         {
             entity.setEntityDead();
         }
@@ -69,7 +69,7 @@ public class WorldServer extends World
         {
             i1 = l;
         }
-        return i1 > 16 || field_6160_D.configManager.isOp(entityplayer.username);
+        return i1 > 16 || mcServer.configManager.isOp(entityplayer.username);
     }
 
     protected void func_479_b(Entity entity)
@@ -92,20 +92,20 @@ public class WorldServer extends World
     public void func_9206_a(Entity entity, byte byte0)
     {
         Packet38 packet38 = new Packet38(entity.field_331_c, byte0);
-        field_6160_D.field_6028_k.func_609_a(entity, packet38);
+        mcServer.field_6028_k.func_609_a(entity, packet38);
     }
 
     public Explosion func_12015_a(Entity entity, double d, double d1, double d2, 
             float f, boolean flag)
     {
         Explosion explosion = super.func_12015_a(entity, d, d1, d2, f, flag);
-        field_6160_D.configManager.func_12022_a(d, d1, d2, 64D, new Packet60(d, d1, d2, f, explosion.field_12025_g));
+        mcServer.configManager.func_12022_a(d, d1, d2, 64D, new Packet60(d, d1, d2, f, explosion.field_12025_g));
         return explosion;
     }
 
     public ChunkProviderServer field_821;
     public boolean field_819_z;
     public boolean field_816_A;
-    private MinecraftServer field_6160_D;
+    private MinecraftServer mcServer;
     private MCHashTable field_6159_E;
 }

@@ -110,7 +110,7 @@ public class ChunkProviderLoadOrGenerate
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
         return null;
     }
@@ -127,7 +127,7 @@ public class ChunkProviderLoadOrGenerate
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
     }
 
@@ -144,7 +144,7 @@ public class ChunkProviderLoadOrGenerate
         }
         catch(IOException ioexception)
         {
-            ioexception.printStackTrace();
+            ExceptionLogger.log(ioexception);
         }
     }
 

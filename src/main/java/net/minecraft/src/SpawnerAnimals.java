@@ -84,7 +84,7 @@ public final class SpawnerAnimals
                                          try {
                                             var34 = (EntityLiving)var33[var8].getConstructor(new Class[]{World.class}).newInstance(new Object[]{var0});
                                          } catch (Exception var27) {
-                                            var27.printStackTrace();
+                                            ExceptionLogger.log(var27);
                                             return var1;
                                          }
 

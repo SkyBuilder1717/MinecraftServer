@@ -43,7 +43,7 @@ public class ServerGUI extends JComponent
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
     }
 

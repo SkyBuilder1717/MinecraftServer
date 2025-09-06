@@ -25,7 +25,7 @@ class ThreadMonitorConnection extends Thread
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
     }
 

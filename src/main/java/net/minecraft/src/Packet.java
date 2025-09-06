@@ -47,7 +47,7 @@ public abstract class Packet
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
         System.out.println((new StringBuilder()).append("Skipping packet with id ").append(i).toString());
         return null;

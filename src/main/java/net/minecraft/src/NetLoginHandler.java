@@ -50,7 +50,7 @@ public class NetLoginHandler extends NetHandler
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
     }
 

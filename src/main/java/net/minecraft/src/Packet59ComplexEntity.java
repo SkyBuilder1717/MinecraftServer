@@ -27,7 +27,7 @@ public class Packet59ComplexEntity extends Packet
         }
         catch(IOException ioexception)
         {
-            ioexception.printStackTrace();
+            ExceptionLogger.log(ioexception);
         }
     }
 

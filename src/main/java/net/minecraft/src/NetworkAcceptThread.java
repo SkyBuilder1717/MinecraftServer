@@ -36,7 +36,7 @@ class NetworkAcceptThread extends Thread
             }
             catch(IOException ioexception)
             {
-                ioexception.printStackTrace();
+                ExceptionLogger.log(ioexception);
             }
         } while(true);
     }

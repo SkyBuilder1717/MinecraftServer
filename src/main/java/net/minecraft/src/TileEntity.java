@@ -67,7 +67,7 @@ public class TileEntity
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
         if(tileentity != null)
         {

@@ -64,7 +64,7 @@ public class World
         }
         catch(IOException ioexception)
         {
-            ioexception.printStackTrace();
+            ExceptionLogger.log(ioexception);
             throw new RuntimeException("Failed to check session lock, aborting");
         }
         Object obj = new WorldProvider();
@@ -94,7 +94,7 @@ public class World
             }
             catch(Exception exception1)
             {
-                exception1.printStackTrace();
+                ExceptionLogger.log(exception1);
             }
         }
         if(worldprovider != null)
@@ -202,7 +202,7 @@ public class World
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
     }
 

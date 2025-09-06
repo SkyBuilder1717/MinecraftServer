@@ -27,7 +27,7 @@ public class ThreadCommandReader extends Thread
         }
         catch(IOException ioexception)
         {
-            ioexception.printStackTrace();
+            ExceptionLogger.log(ioexception);
         }
     }
 

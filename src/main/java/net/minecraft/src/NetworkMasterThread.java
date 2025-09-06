@@ -36,7 +36,7 @@ class NetworkMasterThread extends Thread
         }
         catch(InterruptedException interruptedexception)
         {
-            interruptedexception.printStackTrace();
+            ExceptionLogger.log(interruptedexception);
         }
     }
 

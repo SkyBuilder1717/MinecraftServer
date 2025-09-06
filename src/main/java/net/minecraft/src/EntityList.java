@@ -40,7 +40,7 @@ public class EntityList
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
         return entity;
     }
@@ -62,7 +62,7 @@ public class EntityList
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
         if(entity != null)
         {

@@ -20,11 +20,10 @@ class ThreadLoginVerifier extends Thread
         try
         {
             String s = NetLoginHandler.getServerId(loginHandler);
-            URL url = new URL((new StringBuilder()).append("http://www.minecraft.net/game/checkserver.jsp?user=").append(loginPacket.username).append("&serverId=").append(s).toString());
+            URL url = new URL("https://session.minecraft.net/game/checkserver.jsp?user=" + loginPacket.username + "&serverId=" + s);
             BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(url.openStream()));
             String s1 = bufferedreader.readLine();
             bufferedreader.close();
-            System.out.println((new StringBuilder()).append("THE REPLY IS ").append(s1).toString());
             if(s1.equals("YES"))
             {
                 NetLoginHandler.setLoginPacket(loginHandler, loginPacket);
@@ -35,7 +34,7 @@ class ThreadLoginVerifier extends Thread
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
     }
 

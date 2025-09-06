@@ -84,7 +84,7 @@ public class ChunkLoader
             }
             catch(Exception exception)
             {
-                exception.printStackTrace();
+                ExceptionLogger.log(exception);
             }
         }
         return null;
@@ -117,7 +117,7 @@ public class ChunkLoader
         }
         catch(Exception exception)
         {
-            exception.printStackTrace();
+            ExceptionLogger.log(exception);
         }
     }
 
