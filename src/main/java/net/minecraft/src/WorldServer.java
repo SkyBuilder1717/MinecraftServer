@@ -69,7 +69,7 @@ public class WorldServer extends World
         {
             i1 = l;
         }
-        return i1 > 16 || mcServer.configManager.isOp(entityplayer.username);
+        return (mcServer.spawnProtection < 1) || (i1 > mcServer.spawnProtection || mcServer.configManager.isOp(entityplayer.username));
     }
 
     protected void func_479_b(Entity entity)

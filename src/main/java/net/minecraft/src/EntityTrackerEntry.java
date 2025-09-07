@@ -228,69 +228,45 @@ public class EntityTrackerEntry
     {
         for(int i = 0; i < list.size(); i++)
         {
-            func_606_a((EntityPlayerMP)list.get(i));
+            EntityPlayerMP player = (EntityPlayerMP)list.get(i);
+            if (!player.mcServer.configManager.isVanished(player)) {
+                func_606_a(player);
+            }
         }
 
     }
 
     private Packet func_602_b()
     {
-        if(field_909_a instanceof EntityItem)
-        {
-            EntityItem entityitem = (EntityItem)field_909_a;
+        if (field_909_a instanceof EntityItem) {
+            EntityItem entityitem = (EntityItem) field_909_a;
             Packet21PickupSpawn packet21pickupspawn = new Packet21PickupSpawn(entityitem);
-            entityitem.posX = (double)packet21pickupspawn.xPosition / 32D;
-            entityitem.posY = (double)packet21pickupspawn.yPosition / 32D;
-            entityitem.posZ = (double)packet21pickupspawn.zPosition / 32D;
+            entityitem.posX = (double) packet21pickupspawn.xPosition / 32D;
+            entityitem.posY = (double) packet21pickupspawn.yPosition / 32D;
+            entityitem.posZ = (double) packet21pickupspawn.zPosition / 32D;
             return packet21pickupspawn;
         }
-        if(field_909_a instanceof EntityPlayerMP)
-        {
-            return new Packet20NamedEntitySpawn((EntityPlayer)field_909_a);
+
+        if (field_909_a instanceof EntityPlayer) {
+            EntityPlayerMP player = (EntityPlayerMP) field_909_a;
+            return new Packet20NamedEntitySpawn(player);
         }
-        if(field_909_a instanceof EntityMinecart)
-        {
-            EntityMinecart entityminecart = (EntityMinecart)field_909_a;
-            if(entityminecart.minecartType == 0)
-            {
-                return new Packet23VehicleSpawn(field_909_a, 10);
-            }
-            if(entityminecart.minecartType == 1)
-            {
-                return new Packet23VehicleSpawn(field_909_a, 11);
-            }
-            if(entityminecart.minecartType == 2)
-            {
-                return new Packet23VehicleSpawn(field_909_a, 12);
-            }
+
+        if (field_909_a instanceof EntityMinecart) {
+            EntityMinecart entityminecart = (EntityMinecart) field_909_a;
+            if (entityminecart.minecartType == 0) return new Packet23VehicleSpawn(field_909_a, 10);
+            if (entityminecart.minecartType == 1) return new Packet23VehicleSpawn(field_909_a, 11);
+            if (entityminecart.minecartType == 2) return new Packet23VehicleSpawn(field_909_a, 12);
         }
-        if(field_909_a instanceof EntityBoat)
-        {
-            return new Packet23VehicleSpawn(field_909_a, 1);
-        }
-        if(field_909_a instanceof IAnimals)
-        {
-            return new Packet24MobSpawn((EntityLiving)field_909_a);
-        }
-        if(field_909_a instanceof EntityFish)
-        {
-            return new Packet23VehicleSpawn(field_909_a, 90);
-        }
-        if(field_909_a instanceof EntityArrow)
-        {
-            return new Packet23VehicleSpawn(field_909_a, 60);
-        }
-        if(field_909_a instanceof EntitySnowball)
-        {
-            return new Packet23VehicleSpawn(field_909_a, 61);
-        }
-        if(field_909_a instanceof EntityTNTPrimed)
-        {
-            return new Packet23VehicleSpawn(field_909_a, 50);
-        } else
-        {
-            throw new IllegalArgumentException((new StringBuilder()).append("Don't know how to add ").append(field_909_a.getClass()).append("!").toString());
-        }
+
+        if (field_909_a instanceof EntityBoat) return new Packet23VehicleSpawn(field_909_a, 1);
+        if (field_909_a instanceof IAnimals) return new Packet24MobSpawn((EntityLiving) field_909_a);
+        if (field_909_a instanceof EntityFish) return new Packet23VehicleSpawn(field_909_a, 90);
+        if (field_909_a instanceof EntityArrow) return new Packet23VehicleSpawn(field_909_a, 60);
+        if (field_909_a instanceof EntitySnowball) return new Packet23VehicleSpawn(field_909_a, 61);
+        if (field_909_a instanceof EntityTNTPrimed) return new Packet23VehicleSpawn(field_909_a, 50);
+
+        throw new IllegalArgumentException("Don't know how to add " + field_909_a.getClass() + "!");
     }
 
     public void func_9219_b(EntityPlayerMP entityplayermp)

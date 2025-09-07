@@ -51,6 +51,27 @@ public class ServerConfigurationManager
         playerManagerObj.func_9214_a(entityplayermp);
     }
 
+    public void hidePlayer(EntityPlayerMP player) {
+        mcServer.vanishedPlayers.put(player, true);
+        Packet29DestroyEntity destroy = new Packet29DestroyEntity(player.field_331_c);
+        for (Object o : playerEntities) {
+            EntityPlayerMP other = (EntityPlayerMP) o;
+            if (other != player) {
+                other.field_421_a.sendPacket(destroy);
+            }
+        }
+    }
+
+    public void showPlayer(EntityPlayerMP player) {
+        mcServer.vanishedPlayers.remove(player);
+        for (Object o : playerEntities) {
+            EntityPlayerMP other = (EntityPlayerMP) o;
+            if (other != player) {
+                other.field_421_a.sendPacket(new Packet20NamedEntitySpawn(player));
+            }
+        }
+    }
+
     public void func_613_b(EntityPlayerMP entityplayermp)
     {
         playerManagerObj.func_543_c(entityplayermp);
@@ -61,6 +82,7 @@ public class ServerConfigurationManager
         playerNBTManagerObj.writePlayerData(entityplayermp);
         mcServer.worldMngr.func_12016_d(entityplayermp);
         playerEntities.remove(entityplayermp);
+        mcServer.vanishedPlayers.remove(entityplayermp);
         playerManagerObj.func_9213_b(entityplayermp);
     }
 
@@ -133,7 +155,10 @@ public class ServerConfigurationManager
             EntityPlayerMP entityplayermp = (EntityPlayerMP)playerEntities.get(i);
             entityplayermp.field_421_a.sendPacket(packet);
         }
+    }
 
+    public boolean isVanished(EntityPlayerMP player) {
+        return mcServer.vanishedPlayers.containsKey(player);
     }
 
     public String getPlayerList()

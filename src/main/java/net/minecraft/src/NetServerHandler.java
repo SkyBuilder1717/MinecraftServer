@@ -377,40 +377,15 @@ public class NetServerHandler extends NetHandler
 
     private void func_4010_d(String s)
     {
-        if(s.toLowerCase().startsWith("/me "))
-        {
-            s = (new StringBuilder()).append("* ").append(playerEntity.username).append(" ").append(s.substring(s.indexOf(" ")).trim()).toString();
-            logger.info(s);
-            mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat(s));
-        } else
-        if(s.toLowerCase().startsWith("/kill"))
-        {
-            playerEntity.attackEntity(null, 1000);
-        } else
-        if(s.toLowerCase().startsWith("/tell "))
-        {
-            String as[] = s.split(" ");
-            if(as.length >= 3)
-            {
-                s = s.substring(s.indexOf(" ")).trim();
-                s = s.substring(s.indexOf(" ")).trim();
-                s = (new StringBuilder()).append("\2477").append(playerEntity.username).append(" whispers ").append(s).toString();
-                logger.info((new StringBuilder()).append(s).append(" to ").append(as[1]).toString());
-                if(!mcServer.configManager.sendPacketToPlayer(as[1], new Packet3Chat(s)))
-                {
-                    sendPacket(new Packet3Chat("\247cThere's no player by that name online."));
-                }
-            }
-        } else
+        String s1 = s.substring(1);
         if(mcServer.configManager.isOp(playerEntity.username))
         {
-            String s1 = s.substring(1);
-            logger.info((new StringBuilder()).append(playerEntity.username).append(" issued server command: ").append(s1).toString());
+            logger.info(playerEntity.username + " issued server command: " + s1);
             mcServer.addCommand(s1, this);
         } else
         {
-            String s2 = s.substring(1);
-            logger.info((new StringBuilder()).append(playerEntity.username).append(" tried command: ").append(s2).toString());
+            logger.info(playerEntity.username + " tried command: " + s1);
+            log("Insufficient privileges.");
         }
     }
 
@@ -531,8 +506,8 @@ public class NetServerHandler extends NetHandler
     public static Logger logger = Logger.getLogger("Minecraft");
     public NetworkManager netManager;
     public boolean field_18_c;
-    private MinecraftServer mcServer;
-    private EntityPlayerMP playerEntity;
+    public MinecraftServer mcServer;
+    public EntityPlayerMP playerEntity;
     private int field_15_f;
     private double field_9009_g;
     private double field_9008_h;

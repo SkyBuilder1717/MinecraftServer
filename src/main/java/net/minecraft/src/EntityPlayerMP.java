@@ -51,7 +51,7 @@ public class EntityPlayerMP extends EntityPlayer
         {
             return false;
         }
-        if(!mcServer.field_9011_n)
+        if(!mcServer.field_6032_g)
         {
             if(entity instanceof EntityPlayer)
             {
