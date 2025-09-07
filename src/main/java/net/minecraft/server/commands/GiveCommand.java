@@ -1,10 +1,7 @@
 package net.minecraft.server.commands;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.src.EntityPlayerMP;
-import net.minecraft.src.ICommandListener;
-import net.minecraft.src.Item;
-import net.minecraft.src.ItemStack;
+import net.minecraft.src.*;
 
 public class GiveCommand implements ICommand {
     @Override
@@ -20,7 +17,7 @@ public class GiveCommand implements ICommand {
             int itemId = Integer.parseInt(args[1]);
             int count = args.length >= 3 ? Integer.parseInt(args[2]) : 1;
             if(Item.itemsList[itemId] != null) {
-                player.func_161_a(new ItemStack(itemId, count));
+                player.field_421_a.sendPacket(new Packet17AddToInventory(new ItemStack(itemId, count), count));
                 sender.log("Giving " + args[0] + " id " + itemId);
             } else {
                 sender.log("Invalid item id " + itemId);
@@ -28,6 +25,11 @@ public class GiveCommand implements ICommand {
         } catch(Exception e) {
             sender.log("Invalid number format.");
         }
+    }
+
+    @Override
+    public boolean OnlyOP() {
+        return true;
     }
 
     @Override

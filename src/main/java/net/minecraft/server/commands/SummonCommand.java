@@ -59,6 +59,11 @@ public class SummonCommand implements ICommand {
     }
 
     @Override
+    public boolean OnlyOP() {
+        return true;
+    }
+
+    @Override
     public String getParams() {
         return "<entity> [player|x y z]";
     }

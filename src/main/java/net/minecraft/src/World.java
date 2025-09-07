@@ -2001,6 +2001,14 @@ public class World
     {
     }
 
+    public void sendAnimationPacket(Entity entity, int animationId) {
+        Packet18ArmAnimation packet = new Packet18ArmAnimation(entity, animationId);
+        for (int i = 0; i < playerEntities.size(); i++) {
+            EntityPlayerMP player = (EntityPlayerMP)playerEntities.get(i);
+            player.field_421_a.sendPacket(packet);
+        }
+    }
+
     public boolean field_4280_a;
     private List field_821;
     public List field_815_a;
@@ -2018,6 +2026,7 @@ public class World
     private long field_784_F;
     protected int field_4277_j;
     public int monstersEnabled;
+    public boolean pvpEnabled;
     public Random rand;
     public int spawnX;
     public int spawnY;

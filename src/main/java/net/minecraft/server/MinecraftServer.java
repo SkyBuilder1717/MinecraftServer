@@ -29,6 +29,7 @@ public class MinecraftServer
 
         ServerCommands.register("help", new HelpCommand());
         ServerCommands.register("heal", new HealCommand());
+        ServerCommands.register("kill", new KillCommand());
         ServerCommands.register("give", new GiveCommand());
         ServerCommands.register("tp", new TpCommand());
         ServerCommands.register("tell", new TellCommand());
@@ -68,7 +69,6 @@ public class MinecraftServer
         onlineMode = propertyManagerObj.getBooleanProperty("online-mode", true);
         spawnProtection = propertyManagerObj.getIntProperty("spawn-protection", 16);
         noAnimals = propertyManagerObj.getBooleanProperty("spawn-animals", true);
-        pvp_enabled = propertyManagerObj.getBooleanProperty("pvp", true);
         InetAddress inetaddress = null;
         if(!s.isEmpty())
         {
@@ -110,6 +110,7 @@ public class MinecraftServer
         worldMngr = new WorldServer(this, new File("."), s, propertyManagerObj.getBooleanProperty("hellworld", false) ? -1 : 0);
         worldMngr.func_4072_a(new WorldManager(this));
         worldMngr.monstersEnabled = propertyManagerObj.getBooleanProperty("spawn-monsters", true) ? 1 : 0;
+        worldMngr.pvpEnabled = propertyManagerObj.getBooleanProperty("pvp", true);
         configManager.setPlayerManager(worldMngr);
         byte byte0 = 10;
         for(int i = -byte0; i <= byte0; i++)
@@ -150,7 +151,7 @@ public class MinecraftServer
             for (Object obj : configManager.playerEntities) {
                 EntityPlayerMP player = (EntityPlayerMP) obj;
                 if(player != null && player.field_421_a != null) {
-                    player.field_421_a.func_43_c("Server shutting down");
+                    player.field_421_a.sendPacket(new Packet255KickDisconnect("Server shutting down"));
                 }
             }
             configManager.savePlayerStates();
@@ -260,9 +261,11 @@ public class MinecraftServer
         String command = args[0].toLowerCase();
         ICommand entry = ServerCommands.getCommand(command);
         if (entry != null) {
-            String[] realArgs = Arrays.copyOfRange(args, 1, args.length);
-            entry.execute(this, icommandlistener, realArgs);
-            return;
+            if (!entry.OnlyOP() || (entry.OnlyOP() && configManager.isOp(mcServer.getUsername()))) {
+                String[] realArgs = Arrays.copyOfRange(args, 1, args.length);
+                entry.execute(this, icommandlistener, realArgs);
+                return;
+            }
         }
 
         icommandlistener.log("Unknown console command: \"" + cmd.toLowerCase() + "\".");
@@ -334,6 +337,5 @@ public class MinecraftServer
     public EntityTracker field_6028_k;
     public boolean onlineMode;
     public boolean noAnimals;
-    public boolean pvp_enabled;
     public final HashMap<EntityPlayerMP, Boolean> vanishedPlayers = new HashMap<>();
 }

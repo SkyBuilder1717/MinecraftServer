@@ -179,7 +179,7 @@ public class NetServerHandler extends NetHandler
     public void handleBlockDig(Packet14BlockDig packet14blockdig)
     {
         playerEntity.inventory.mainInventory[playerEntity.inventory.currentItem] = field_10_k;
-        boolean flag = mcServer.worldMngr.field_819_z = mcServer.configManager.isOp(playerEntity.username);
+        boolean flag = mcServer.worldMngr.field_819_z = (mcServer.spawnProtection < 1) || mcServer.configManager.isOp(playerEntity.username);
         boolean flag1 = false;
         if(packet14blockdig.status == 0)
         {
@@ -215,7 +215,7 @@ public class NetServerHandler extends NetHandler
         }
         if(packet14blockdig.status == 0)
         {
-            if(j1 > 16 || flag)
+            if(j1 > mcServer.spawnProtection || flag)
             {
                 playerEntity.field_425_ad.func_324_a(i, j, k);
             }
@@ -247,7 +247,7 @@ public class NetServerHandler extends NetHandler
 
     public void handlePlace(Packet15Place packet15place)
     {
-        boolean flag = mcServer.worldMngr.field_819_z = mcServer.configManager.isOp(playerEntity.username);
+        boolean flag = mcServer.worldMngr.field_819_z = (mcServer.spawnProtection < 1) || mcServer.configManager.isOp(playerEntity.username);
         if(packet15place.direction == 255)
         {
             ItemStack itemstack = packet15place.id < 0 ? null : new ItemStack(packet15place.id);
@@ -264,7 +264,7 @@ public class NetServerHandler extends NetHandler
             {
                 j1 = i1;
             }
-            if(j1 > 16 || flag)
+            if(j1 > mcServer.spawnProtection || flag)
             {
                 ItemStack itemstack1 = packet15place.id < 0 ? null : new ItemStack(packet15place.id);
                 playerEntity.field_425_ad.func_327_a(playerEntity, mcServer.worldMngr, itemstack1, i, j, k, l);
@@ -301,7 +301,11 @@ public class NetServerHandler extends NetHandler
 
     public void handleErrorMessage(String s)
     {
-        logger.info((new StringBuilder()).append(playerEntity.username).append(" lost connection: ").append(s).toString());
+        if ("End of stream".equals(s) && mcServer.field_6032_g) {
+            logger.info(playerEntity.username + " disconnected: Server shutting down");
+        } else {
+            logger.info(playerEntity.username + " lost connection: " + s);
+        }
         mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat((new StringBuilder()).append("\247e").append(playerEntity.username).append(" left the game.").toString()));
         mcServer.configManager.playerLoggedOut(playerEntity);
         field_18_c = true;
@@ -378,15 +382,8 @@ public class NetServerHandler extends NetHandler
     private void func_4010_d(String s)
     {
         String s1 = s.substring(1);
-        if(mcServer.configManager.isOp(playerEntity.username))
-        {
-            logger.info(playerEntity.username + " issued server command: " + s1);
-            mcServer.addCommand(s1, this);
-        } else
-        {
-            logger.info(playerEntity.username + " tried command: " + s1);
-            log("Insufficient privileges.");
-        }
+        logger.info(playerEntity.username + " issued server command: " + s1);
+        mcServer.addCommand(s1, this);
     }
 
     public void handleArmAnimation(Packet18ArmAnimation packet18armanimation)

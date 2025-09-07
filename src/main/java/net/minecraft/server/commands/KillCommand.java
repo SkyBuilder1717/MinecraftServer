@@ -7,7 +7,7 @@ import net.minecraft.src.NetServerHandler;
 
 import java.util.Objects;
 
-public class HealCommand implements ICommand {
+public class KillCommand implements ICommand {
 
     @Override
     public void execute(MinecraftServer server, ICommandListener sender, String[] args) {
@@ -28,15 +28,12 @@ public class HealCommand implements ICommand {
             }
         }
 
-        target.field_9109_aQ = target.field_9099_av;
+        target.field_9109_aQ = 0;
 
         String username = target.username;
         if (Objects.equals(sender.getUsername(), target.username)) username = "You";
 
-        sender.log(username + " has been healed!");
-        if(!Objects.equals(sender.getUsername(), target.username)) {
-            server.configManager.sendChatMessageToPlayer(target.username, "You have been healed by " + sender.getUsername() + "!");
-        }
+        sender.log(username + " has been killed.");
     }
 
     @Override
@@ -51,6 +48,6 @@ public class HealCommand implements ICommand {
 
     @Override
     public String getDescription() {
-        return "heals a player";
+        return "kills a player";
     }
 }

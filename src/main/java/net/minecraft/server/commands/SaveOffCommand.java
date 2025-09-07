@@ -11,6 +11,11 @@ public class SaveOffCommand implements ICommand {
     }
 
     @Override
+    public boolean OnlyOP() {
+        return true;
+    }
+
+    @Override
     public String getParams() {
         return "";
     }

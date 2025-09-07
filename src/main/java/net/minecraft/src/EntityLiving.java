@@ -89,7 +89,7 @@ public class EntityLiving extends Entity
         {
             attackEntity(null, 1);
         }
-        if(field_9079_ae || worldObj.multiplayerWorld)
+        if(field_9079_ae || (worldObj.multiplayerWorld && !worldObj.pvpEnabled))
         {
             field_9061_Z = 0;
         }
@@ -251,7 +251,7 @@ public class EntityLiving extends Entity
 
     public boolean attackEntity(Entity entity, int i)
     {
-        if(worldObj.multiplayerWorld)
+        if(worldObj.multiplayerWorld && !worldObj.pvpEnabled)
         {
             return false;
         }

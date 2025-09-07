@@ -16,23 +16,32 @@ public class TimeCommand implements ICommand {
         if (args.length == 0) {
             sender.log(String.format("Current time: %02d:%02d", hours, minutes));
         } else {
-            String arg = args[0];
-            try {
-                if (arg.contains(":")) {
-                    String[] hm = arg.split(":");
-                    int h = Integer.parseInt(hm[0]);
-                    int m = Integer.parseInt(hm[1]);
-                    world.worldTime = ((h - 6 + 24) % 24) * 1000 + (m * 1000L / 60);
-                    sender.log("Time set to: " + String.format("%02d:%02d", h, m));
-                } else {
-                    long time = Long.parseLong(arg);
-                    world.worldTime = time;
-                    sender.log("Time set to: " + time);
+            if (server.configManager.isOp(sender.getUsername())) {
+                String arg = args[0];
+                try {
+                    if (arg.contains(":")) {
+                        String[] hm = arg.split(":");
+                        int h = Integer.parseInt(hm[0]);
+                        int m = Integer.parseInt(hm[1]);
+                        world.worldTime = ((h - 6 + 24) % 24) * 1000 + (m * 1000L / 60);
+                        sender.log("Time set to: " + String.format("%02d:%02d", h, m));
+                    } else {
+                        long time = Long.parseLong(arg);
+                        world.worldTime = time;
+                        sender.log("Time set to: " + time);
+                    }
+                } catch (NumberFormatException e) {
+                    sender.log("Invalid number or format! Use HH:MM or ticks.");
                 }
-            } catch (NumberFormatException e) {
-                sender.log("Invalid number or format! Use HH:MM or ticks.");
+            } else {
+                sender.log("You need to be OP to run this command arguments.");
             }
         }
+    }
+
+    @Override
+    public boolean OnlyOP() {
+        return false;
     }
 
     @Override

@@ -9,6 +9,7 @@ public class EntityRegistryInitializer {
         EntityRegistry.register("ghast", EntityGhast::new);
         EntityRegistry.register("pigzombie", EntityPigZombie::new);
         EntityRegistry.register("slime", EntitySlime::new);
+        EntityRegistry.register("sheep", EntitySheep::new);
         EntityRegistry.register("cow", EntityCow::new);
         EntityRegistry.register("pig", EntityPig::new);
         EntityRegistry.register("chicken", EntityChicken::new);

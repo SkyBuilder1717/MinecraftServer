@@ -11,7 +11,7 @@ public class EntityTracker
 
     public EntityTracker(MinecraftServer minecraftserver)
     {
-        field_911_a = new HashSet();
+        field_911_a = new HashSet<>();
         field_910_b = new MCHashTable();
         mcServer = minecraftserver;
         field_912_d = minecraftserver.configManager.func_640_a();
@@ -19,55 +19,99 @@ public class EntityTracker
 
     public void func_611_a(Entity entity)
     {
-        if(entity instanceof EntityPlayerMP)
+        if (entity instanceof EntityPlayerMP)
         {
             func_6187_a(entity, 512, 2);
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)entity;
-            Iterator iterator = field_911_a.iterator();
-            do
+            EntityPlayerMP newPlayer = (EntityPlayerMP)entity;
+            boolean newIsVanished = mcServer.configManager.isVanished(newPlayer);
+
+            for (Iterator it = field_911_a.iterator(); it.hasNext();)
             {
-                if(!iterator.hasNext())
+                EntityTrackerEntry entry = (EntityTrackerEntry)it.next();
+                Entity tracked = entry.field_909_a;
+
+                if (tracked == newPlayer) continue;
+
+                if (tracked instanceof EntityPlayerMP)
                 {
-                    break;
-                }
-                EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry)iterator.next();
-                if(entitytrackerentry.field_909_a != entityplayermp)
+                    EntityPlayerMP trackedPlayer = (EntityPlayerMP)tracked;
+                    boolean trackedIsVanished = mcServer.configManager.isVanished(trackedPlayer);
+
+                    if (trackedIsVanished)
+                    {
+                        if (newIsVanished)
+                        {
+                            entry.func_606_a(newPlayer);
+                        }
+                    } else
+                    {
+                        entry.func_606_a(newPlayer);
+                    }
+                } else
                 {
-                    entitytrackerentry.func_606_a(entityplayermp);
+                    entry.func_606_a(newPlayer);
                 }
-            } while(true);
-        } else
-        if(entity instanceof EntityFish)
+            }
+
+            List visiblePlayers = new ArrayList();
+            for (Object o : mcServer.worldMngr.playerEntities)
+            {
+                if (!(o instanceof EntityPlayerMP)) continue;
+                EntityPlayerMP player = (EntityPlayerMP)o;
+                if (player == newPlayer) continue;
+
+                if (newIsVanished)
+                {
+                    if (mcServer.configManager.isVanished(player))
+                    {
+                        visiblePlayers.add(player);
+                    }
+                } else
+                {
+                    visiblePlayers.add(player);
+                }
+            }
+
+            EntityTrackerEntry newEntry = (EntityTrackerEntry)field_910_b.lookup(newPlayer.field_331_c);
+            if (newEntry != null)
+            {
+                newEntry.func_601_b(visiblePlayers);
+            }
+        }
+        else
         {
-            func_6186_a(entity, 64, 5, true);
-        } else
-        if(entity instanceof EntityArrow)
-        {
-            func_6186_a(entity, 64, 5, true);
-        } else
-        if(entity instanceof EntitySnowball)
-        {
-            func_6186_a(entity, 64, 5, true);
-        } else
-        if(entity instanceof EntityItem)
-        {
-            func_6186_a(entity, 64, 20, true);
-        } else
-        if(entity instanceof EntityMinecart)
-        {
-            func_6186_a(entity, 160, 5, true);
-        } else
-        if(entity instanceof EntityBoat)
-        {
-            func_6186_a(entity, 160, 5, true);
-        } else
-        if(entity instanceof IAnimals)
-        {
-            func_6187_a(entity, 160, 3);
-        } else
-        if(entity instanceof EntityTNTPrimed)
-        {
-            func_6186_a(entity, 160, 10, true);
+            if(entity instanceof EntityFish)
+            {
+                func_6186_a(entity, 64, 5, true);
+            } else
+            if(entity instanceof EntityArrow)
+            {
+                func_6186_a(entity, 64, 5, true);
+            } else
+            if(entity instanceof EntitySnowball)
+            {
+                func_6186_a(entity, 64, 5, true);
+            } else
+            if(entity instanceof EntityItem)
+            {
+                func_6186_a(entity, 64, 20, true);
+            } else
+            if(entity instanceof EntityMinecart)
+            {
+                func_6186_a(entity, 160, 5, true);
+            } else
+            if(entity instanceof EntityBoat)
+            {
+                func_6186_a(entity, 160, 5, true);
+            } else
+            if(entity instanceof IAnimals)
+            {
+                func_6187_a(entity, 160, 3);
+            } else
+            if(entity instanceof EntityTNTPrimed)
+            {
+                func_6186_a(entity, 160, 10, true);
+            }
         }
     }
 
@@ -90,10 +134,41 @@ public class EntityTracker
             EntityTrackerEntry entitytrackerentry = new EntityTrackerEntry(entity, i, j, flag);
             field_911_a.add(entitytrackerentry);
             field_910_b.addKey(entity.field_331_c, entitytrackerentry);
-            entitytrackerentry.func_601_b(mcServer.worldMngr.playerEntities);
+
+            List visiblePlayerEntities = new ArrayList();
+            boolean trackedIsPlayer = entity instanceof EntityPlayerMP;
+            boolean trackedIsVanished = false;
+            if (trackedIsPlayer) trackedIsVanished = mcServer.configManager.isVanished((EntityPlayerMP)entity);
+
+            for (Object o : mcServer.worldMngr.playerEntities)
+            {
+                if (!(o instanceof EntityPlayerMP)) continue;
+                EntityPlayerMP player = (EntityPlayerMP)o;
+                if (player == entity) continue;
+
+                if (trackedIsPlayer)
+                {
+                    if (trackedIsVanished)
+                    {
+                        if (mcServer.configManager.isVanished(player))
+                        {
+                            visiblePlayerEntities.add(player);
+                        }
+                    } else
+                    {
+                        visiblePlayerEntities.add(player);
+                    }
+                } else
+                {
+                    visiblePlayerEntities.add(player);
+                }
+            }
+
+            entitytrackerentry.func_601_b(visiblePlayerEntities);
             return;
         }
     }
+
 
     public void func_610_b(Entity entity)
     {
@@ -119,20 +194,49 @@ public class EntityTracker
     {
         ArrayList arraylist = new ArrayList();
         Iterator iterator = field_911_a.iterator();
-        do
+        while(iterator.hasNext())
         {
-            if(!iterator.hasNext())
-            {
-                break;
-            }
             EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry)iterator.next();
-            entitytrackerentry.func_605_a(mcServer.worldMngr.playerEntities);
+
+            List visiblePlayers = new ArrayList();
+            Entity tracked = entitytrackerentry.field_909_a;
+            boolean trackedIsPlayer = tracked instanceof EntityPlayerMP;
+            boolean trackedIsVanished = false;
+            if (trackedIsPlayer) trackedIsVanished = mcServer.configManager.isVanished((EntityPlayerMP)tracked);
+
+            for (Object o : mcServer.worldMngr.playerEntities)
+            {
+                if (!(o instanceof EntityPlayerMP)) continue;
+                EntityPlayerMP player = (EntityPlayerMP)o;
+                if (player == tracked) continue;
+
+                if (trackedIsPlayer)
+                {
+                    if (trackedIsVanished)
+                    {
+                        if (mcServer.configManager.isVanished(player))
+                        {
+                            visiblePlayers.add(player);
+                        }
+                    } else
+                    {
+                        visiblePlayers.add(player);
+                    }
+                } else
+                {
+                    visiblePlayers.add(player);
+                }
+            }
+
+            entitytrackerentry.func_605_a(visiblePlayers);
+
             if(entitytrackerentry.field_900_j && (entitytrackerentry.field_909_a instanceof EntityPlayerMP))
             {
                 arraylist.add((EntityPlayerMP)entitytrackerentry.field_909_a);
             }
-        } while(true);
-label0:
+        }
+
+        label0:
         for(int i = 0; i < arraylist.size(); i++)
         {
             EntityPlayerMP entityplayermp = (EntityPlayerMP)arraylist.get(i);
@@ -144,13 +248,32 @@ label0:
                     continue label0;
                 }
                 EntityTrackerEntry entitytrackerentry1 = (EntityTrackerEntry)iterator1.next();
-                if(entitytrackerentry1.field_909_a != entityplayermp)
+                if(entitytrackerentry1.field_909_a == entityplayermp)
+                {
+                    continue;
+                }
+
+                if(entitytrackerentry1.field_909_a instanceof EntityPlayerMP)
+                {
+                    EntityPlayerMP trackedPlayer = (EntityPlayerMP)entitytrackerentry1.field_909_a;
+                    boolean trackedIsVanished = mcServer.configManager.isVanished(trackedPlayer);
+
+                    if(trackedIsVanished)
+                    {
+                        if(mcServer.configManager.isVanished(entityplayermp))
+                        {
+                            entitytrackerentry1.func_606_a(entityplayermp);
+                        }
+                    } else
+                    {
+                        entitytrackerentry1.func_606_a(entityplayermp);
+                    }
+                } else
                 {
                     entitytrackerentry1.func_606_a(entityplayermp);
                 }
             } while(true);
         }
-
     }
 
     public void func_12021_a(Entity entity, Packet packet)
@@ -181,7 +304,7 @@ label0:
 
     }
 
-    private Set field_911_a;
+    private Set<EntityTrackerEntry> field_911_a;
     private MCHashTable field_910_b;
     private MinecraftServer mcServer;
     private int field_912_d;

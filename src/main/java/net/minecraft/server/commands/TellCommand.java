@@ -25,6 +25,11 @@ public class TellCommand implements ICommand {
     }
 
     @Override
+    public boolean OnlyOP() {
+        return false;
+    }
+
+    @Override
     public String getParams() {
         return "<player> <message>";
     }

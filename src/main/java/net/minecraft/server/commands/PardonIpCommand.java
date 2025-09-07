@@ -13,6 +13,11 @@ public class PardonIpCommand implements ICommand {
     }
 
     @Override
+    public boolean OnlyOP() {
+        return true;
+    }
+
+    @Override
     public String getParams() {
         return "<ip>";
     }

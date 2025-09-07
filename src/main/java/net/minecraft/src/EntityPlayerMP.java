@@ -53,14 +53,14 @@ public class EntityPlayerMP extends EntityPlayer
         }
         if(!mcServer.field_6032_g)
         {
-            if(entity instanceof EntityPlayer)
+            if((entity instanceof EntityPlayer) && !mcServer.worldMngr.pvpEnabled)
             {
                 return false;
             }
             if(entity instanceof EntityArrow)
             {
                 EntityArrow entityarrow = (EntityArrow)entity;
-                if(entityarrow.field_439_ah instanceof EntityPlayer)
+                if((entityarrow.field_439_ah instanceof EntityPlayer) && !mcServer.worldMngr.pvpEnabled)
                 {
                     return false;
                 }

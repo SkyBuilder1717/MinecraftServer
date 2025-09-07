@@ -75,6 +75,11 @@ public class TpCommand implements ICommand {
     }
 
     @Override
+    public boolean OnlyOP() {
+        return true;
+    }
+
+    @Override
     public String getParams() {
         return "<player> OR <x> <y> <z> OR <target> <destination>";
     }

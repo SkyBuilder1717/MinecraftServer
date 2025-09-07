@@ -64,9 +64,9 @@ public class ServerConfigurationManager
 
     public void showPlayer(EntityPlayerMP player) {
         mcServer.vanishedPlayers.remove(player);
-        for (Object o : playerEntities) {
+        for (Object o : mcServer.worldMngr.playerEntities) {
             EntityPlayerMP other = (EntityPlayerMP) o;
-            if (other != player) {
+            if (other != player && !mcServer.configManager.isVanished(other)) {
                 other.field_421_a.sendPacket(new Packet20NamedEntitySpawn(player));
             }
         }
@@ -328,7 +328,7 @@ public class ServerConfigurationManager
 
     public boolean isOp(String s)
     {
-        return ops.contains(s.trim().toLowerCase());
+        return s.trim().equalsIgnoreCase("console") || ops.contains(s.trim().toLowerCase());
     }
 
     public EntityPlayerMP getPlayerEntity(String s)

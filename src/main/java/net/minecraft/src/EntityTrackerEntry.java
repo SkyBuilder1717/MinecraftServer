@@ -226,13 +226,7 @@ public class EntityTrackerEntry
 
     public void func_601_b(List list)
     {
-        for(int i = 0; i < list.size(); i++)
-        {
-            EntityPlayerMP player = (EntityPlayerMP)list.get(i);
-            if (!player.mcServer.configManager.isVanished(player)) {
-                func_606_a(player);
-            }
-        }
+        for(int i = 0; i < list.size(); i++) func_606_a((EntityPlayerMP)list.get(i));
 
     }
 

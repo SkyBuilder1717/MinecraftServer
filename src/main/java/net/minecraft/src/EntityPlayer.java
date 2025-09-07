@@ -223,7 +223,7 @@ public class EntityPlayer extends EntityLiving
         {
             return false;
         }
-        if((entity instanceof EntityMobs) || (entity instanceof EntityArrow))
+        if((entity instanceof EntityMobs) || (entity instanceof EntityArrow) || (worldObj.pvpEnabled && (entity instanceof EntityLiving)))
         {
             if(worldObj.monstersEnabled == 0)
             {
