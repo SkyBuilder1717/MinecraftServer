@@ -29,7 +29,7 @@ public class MinecraftServer
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (MinecraftServer.func_6015_a(this)) {
-                System.out.println("Shutdown hook triggered. Stopping server safely...");
+                System.out.println("\n\nShutdown hook triggered. Stopping server safely...");
                 func_6016_a();
             }
         }));
