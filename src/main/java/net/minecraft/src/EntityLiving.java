@@ -385,7 +385,7 @@ public class EntityLiving extends Entity
         }
         if (!(entity instanceof EntityPlayer)) {
             for (EventListener l : MinecraftServer.instance.pluginManager.getListeners()) {
-                l.onEntityDeath(this, entity);
+                if (entity != null) l.onEntityDeath(this, entity, entity.posX, entity.posY, entity.posZ);
             }
 
         }
