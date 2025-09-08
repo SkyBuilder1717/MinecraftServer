@@ -273,13 +273,12 @@ public class NetServerHandler extends NetHandler
             if(j1 > mcServer.spawnProtection || flag)
             {
                 ItemStack itemstack1 = packet15place.id < 0 ? null : new ItemStack(packet15place.id);
-                if (itemstack1 != null) playerEntity.inventory.addItemStackToInventory(itemstack1);
+                playerEntity.field_425_ad.func_327_a(playerEntity, mcServer.worldMngr, itemstack1, i, j, k, l);
             }
+            playerEntity.field_421_a.sendPacket(new Packet53BlockChange(i, j, k, mcServer.worldMngr));
             for (EventListener l1 : mcServer.pluginManager.getListeners()) {
                 l1.onBlockPlace(playerEntity, i, j, k, packet15place.id);
             }
-
-            playerEntity.field_421_a.sendPacket(new Packet53BlockChange(i, j, k, mcServer.worldMngr));
             if(l == 0)
             {
                 j--;

@@ -9,6 +9,10 @@ public class PluginsCommand implements ICommand {
     @Override
     public void execute(MinecraftServer server, ICommandListener sender, String[] args) {
         List<SASPlugin> plugins = server.pluginManager.getPlugins();
+        if ((long) plugins.size() == 0) {
+            sender.log("No plugins loaded.");
+            return;
+        }
 
         if (args.length == 0) {
             for (SASPlugin pl : plugins) {
@@ -21,8 +25,7 @@ public class PluginsCommand implements ICommand {
             PluginDescription found = null;
             for (SASPlugin pl : plugins) {
                 if (pl.getName().toLowerCase().equals(searchName)) {
-                    PluginDescription plugin = pl.getDescription();
-                    found = plugin;
+                    found = pl.getDescription();
                     break;
                 }
             }

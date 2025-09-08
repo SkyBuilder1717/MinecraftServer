@@ -61,13 +61,16 @@ public class PluginManager {
                 MinecraftServer.logger.warning("Failed to load plugin " + file.getName() + ": " + e.getMessage());
             }
         }
+
+        int plcount = Math.toIntExact(plugins.size());
+        MinecraftServer.logger.info(plcount > 0 ? "Loaded " + plcount + " plugins." : "No plugins loaded.");
     }
 
     public void disablePlugins(MinecraftServer server) {
+        MinecraftServer.logger.warning("Disabling plugins");
         for (SASPlugin plugin : plugins) {
             try {
                 plugin.onDisable(server);
-                MinecraftServer.logger.info("Disabled plugin: " + plugin.getName());
             } catch (Exception e) {
                 MinecraftServer.logger.warning("Error disabling plugin " + plugin.getName() + ": " + e.getMessage());
             }

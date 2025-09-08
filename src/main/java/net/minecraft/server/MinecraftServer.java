@@ -49,6 +49,7 @@ public class MinecraftServer
         ServerCommands.register("op", new OpCommand());
         ServerCommands.register("deop", new DeopCommand());
         ServerCommands.register("say", new SayCommand());
+        ServerCommands.register("plugins", new PluginsCommand());
 
     }
 
