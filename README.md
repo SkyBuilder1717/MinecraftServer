@@ -22,4 +22,4 @@ SkyAlphaServer is having a plugin system, which none of the Minecraft Alpha 1.2.
 
 [Example Plugin](https://github.com/SkyBuilder1717/SkyAlphaServer-plugin)
 
-About plugin development for SkyAlphaServer you can read in wiki.
+About plugin development for SkyAlphaServer you can [read in wiki](https://github.com/SkyBuilder1717/MinecraftServer/wiki).
