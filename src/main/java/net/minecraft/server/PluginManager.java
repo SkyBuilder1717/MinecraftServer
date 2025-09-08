@@ -27,42 +27,53 @@ public class PluginManager {
     public void loadPlugins(MinecraftServer server) {
         File pluginDir = new File("plugins");
         if (!pluginDir.exists() && !pluginDir.mkdirs()) {
-            MinecraftServer.logger.warning("Cannot create \"plugin\" folder! Do jar file have right permissions?");
+            MinecraftServer.logger.warning("Cannot create \"plugins\" folder! Check permissions.");
         }
 
         File[] files = pluginDir.listFiles((dir, name) -> name.endsWith(".jar"));
         if (files == null) return;
 
         for (File file : files) {
-            try {
-                URLClassLoader loader = new URLClassLoader(
-                        new URL[]{file.toURI().toURL()},
-                        server.getClass().getClassLoader()
-                );
-                String mainClass = new java.util.jar.JarFile(file)
-                        .getManifest().getMainAttributes().getValue("Main-Class");
+            try (URLClassLoader loader = new URLClassLoader(
+                    new URL[]{file.toURI().toURL()},
+                    server.getClass().getClassLoader()
+            )) {
+                try (java.util.jar.JarFile jar = new java.util.jar.JarFile(file)) {
+                    java.util.jar.JarEntry entry = jar.getJarEntry("plugin.yml");
+                    if (entry == null) {
+                        MinecraftServer.logger.warning("Plugin " + file.getName() + " has no plugin.yml!");
+                        continue;
+                    }
 
-                if (mainClass == null) {
-                    MinecraftServer.logger.warning("Plugin " + file.getName() + " has no Main-Class!");
-                    continue;
-                }
+                    try (InputStream is = jar.getInputStream(entry)) {
+                        org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
+                        @SuppressWarnings("unchecked")
+                        java.util.Map<String, Object> data = yaml.load(is);
 
-                Class<?> clazz = loader.loadClass(mainClass);
-                Object obj = clazz.getDeclaredConstructor().newInstance();
+                        String mainClass = (String) data.get("main");
+                        if (mainClass == null) {
+                            MinecraftServer.logger.warning("Plugin " + file.getName() + " has no 'main' in plugin.yml!");
+                            continue;
+                        }
 
-                if (obj instanceof SASPlugin) {
-                    SASPlugin plugin = (SASPlugin) obj;
-                    plugin.onEnable(server);
-                    registerPlugin(plugin);
-                } else {
-                    MinecraftServer.logger.warning("Main class " + mainClass + " does not implement SASPlugin!");
+                        Class<?> clazz = loader.loadClass(mainClass);
+                        Object obj = clazz.getDeclaredConstructor().newInstance();
+
+                        if (obj instanceof SASPlugin) {
+                            SASPlugin plugin = (SASPlugin) obj;
+                            plugin.onEnable(server);
+                            registerPlugin(plugin);
+                        } else {
+                            MinecraftServer.logger.warning("Main class " + mainClass + " does not implement SASPlugin!");
+                        }
+                    }
                 }
             } catch (Exception e) {
                 MinecraftServer.logger.warning("Failed to load plugin " + file.getName() + ": " + e.getMessage());
             }
         }
 
-        int plcount = Math.toIntExact(plugins.size());
+        int plcount = plugins.size();
         MinecraftServer.logger.info(plcount > 0 ? "Loaded " + plcount + " plugins." : "No plugins loaded.");
     }
 

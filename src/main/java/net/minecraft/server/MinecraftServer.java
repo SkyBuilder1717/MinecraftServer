@@ -26,6 +26,14 @@ public class MinecraftServer
         ticks = 0;
         field_9010_p = new ArrayList<>();
         pluginManager = new PluginManager();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (MinecraftServer.func_6015_a(this)) {
+                System.out.println("Shutdown hook triggered. Stopping server safely...");
+                func_6016_a();
+            }
+        }));
+
         new ThreadSleepForever(this);
 
         ServerCommands.register("help", new HelpCommand());

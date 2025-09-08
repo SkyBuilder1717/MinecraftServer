@@ -15,11 +15,17 @@ public class PluginsCommand implements ICommand {
         }
 
         if (args.length == 0) {
-            for (SASPlugin pl : plugins) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Plugins: ");
+            for (int i = 0; i < plugins.size(); i++) {
+                SASPlugin pl = plugins.get(i);
                 PluginDescription plugin = pl.getDescription();
                 String version = plugin.version != null && !plugin.version.isEmpty() ? ": v" + plugin.version : "";
-                sender.log(pl.getName() + version);
+                sb.append(plugin.name).append(version);
+                if (i < plugins.size() - 1) sb.append(", ");
             }
+            sb.append(".");
+            sender.log(sb.toString());
         } else {
             String searchName = args[0].toLowerCase();
             PluginDescription found = null;
