@@ -20,12 +20,13 @@ public class MinecraftServer
 
     public MinecraftServer()
     {
+        instance = this;
         server_working = true;
         field_6032_g = false;
         ticks = 0;
         field_9010_p = new ArrayList<>();
+        pluginManager = new PluginManager();
         new ThreadSleepForever(this);
-
 
         ServerCommands.register("help", new HelpCommand());
         ServerCommands.register("heal", new HealCommand());
@@ -100,6 +101,7 @@ public class MinecraftServer
         logger.info("Preparing level \"" + s1 + "\"");
         EntityRegistryInitializer.init();
         initWorld(s1);
+        pluginManager.loadPlugins(this);
         logger.info("Done! For help, type \"help\"");
         return true;
     }
@@ -144,6 +146,7 @@ public class MinecraftServer
     }
 
     public void func_6016_a() {
+        pluginManager.disablePlugins(this);
         logger.info("Stopping server");
 
         if(configManager != null) {
@@ -250,6 +253,9 @@ public class MinecraftServer
         for (IUpdatePlayerListBox o : field_9010_p) {
             o.update();
         }
+        for (EventListener l : pluginManager.getListeners()) {
+            l.onServerTick(this);
+        }
     }
 
     public void addCommand(String s, ICommandListener mcServer) {
@@ -264,6 +270,9 @@ public class MinecraftServer
             if (!entry.OnlyOP() || (entry.OnlyOP() && configManager.isOp(mcServer.getUsername()))) {
                 String[] realArgs = Arrays.copyOfRange(args, 1, args.length);
                 entry.execute(this, icommandlistener, realArgs);
+                for (EventListener l : pluginManager.getListeners()) {
+                    l.onPlayerCommand(icommandlistener, command, args);
+                }
                 return;
             }
         }
@@ -329,6 +338,7 @@ public class MinecraftServer
     public ServerConfigurationManager configManager;
     public boolean server_working;
     public boolean field_6032_g;
+    public PluginManager pluginManager;
     public int spawnProtection;
     int ticks;
     public String loadingMessage;
@@ -338,4 +348,5 @@ public class MinecraftServer
     public boolean onlineMode;
     public boolean noAnimals;
     public final HashMap<EntityPlayerMP, Boolean> vanishedPlayers = new HashMap<>();
+    public static MinecraftServer instance;
 }

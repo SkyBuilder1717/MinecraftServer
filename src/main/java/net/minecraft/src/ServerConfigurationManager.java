@@ -6,7 +6,8 @@ package net.minecraft.src;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.*;
+import net.minecraft.server.EventListener;
 
 public class ServerConfigurationManager
 {
@@ -49,6 +50,9 @@ public class ServerConfigurationManager
         for(; mcServer.worldMngr.getCollidingBoundingBoxes(entityplayermp, entityplayermp.boundingBox).size() != 0; entityplayermp.setPosition(entityplayermp.posX, entityplayermp.posY + 1.0D, entityplayermp.posZ)) { }
         mcServer.worldMngr.entityJoinedWorld(entityplayermp);
         playerManagerObj.func_9214_a(entityplayermp);
+        for (EventListener l : mcServer.pluginManager.getListeners()) {
+            l.onPlayerJoin(entityplayermp, entityplayermp.posX, entityplayermp.posY, entityplayermp.posZ);
+        }
     }
 
     public void hidePlayer(EntityPlayerMP player) {
@@ -82,8 +86,11 @@ public class ServerConfigurationManager
         playerNBTManagerObj.writePlayerData(entityplayermp);
         mcServer.worldMngr.func_12016_d(entityplayermp);
         playerEntities.remove(entityplayermp);
-        mcServer.vanishedPlayers.remove(entityplayermp);
+        if (isVanished(entityplayermp)) mcServer.vanishedPlayers.remove(entityplayermp);
         playerManagerObj.func_9213_b(entityplayermp);
+        for (EventListener l : mcServer.pluginManager.getListeners()) {
+            l.onPlayerQuit(entityplayermp, entityplayermp.posX, entityplayermp.posY, entityplayermp.posZ);
+        }
     }
 
     public EntityPlayerMP login(NetLoginHandler netloginhandler, String s, String s1)
@@ -135,6 +142,9 @@ public class ServerConfigurationManager
         playerManagerObj.func_9214_a(entityplayermp1);
         mcServer.worldMngr.entityJoinedWorld(entityplayermp1);
         playerEntities.add(entityplayermp1);
+        for (EventListener l : MinecraftServer.instance.pluginManager.getListeners()) {
+            l.onPlayerRespawn(entityplayermp1, entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ);
+        }
         return entityplayermp1;
     }
 

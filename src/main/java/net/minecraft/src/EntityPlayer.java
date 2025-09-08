@@ -3,6 +3,7 @@ package net.minecraft.src;
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
+import net.minecraft.server.*;
 import java.util.List;
 import java.util.Random;
 
@@ -94,6 +95,15 @@ public class EntityPlayer extends EntityLiving
     private void func_171_h(Entity entity)
     {
         entity.onCollideWithPlayer(this);
+        if (entity instanceof EntityPlayer) {
+            for (EventListener l : MinecraftServer.instance.pluginManager.getListeners()) {
+                l.onPlayerCollideWithPlayer((EntityPlayer) entity, this);
+            }
+        } else {
+            for (EventListener l : MinecraftServer.instance.pluginManager.getListeners()) {
+                l.onEntityCollideWithPlayer(entity, this);
+            }
+        }
     }
 
     public void onDeath(Entity entity)

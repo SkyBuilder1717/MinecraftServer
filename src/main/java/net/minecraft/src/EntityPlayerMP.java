@@ -4,7 +4,8 @@ package net.minecraft.src;
 // Decompiler options: packimports(3) braces deadcode 
 
 import java.util.*;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.*;
+import net.minecraft.server.EventListener;
 
 public class EntityPlayerMP extends EntityPlayer
 {
@@ -43,6 +44,9 @@ public class EntityPlayerMP extends EntityPlayer
     public void onDeath(Entity entity)
     {
         inventory.dropAllItems();
+        for (EventListener l : mcServer.pluginManager.getListeners()) {
+            l.onPlayerDeath(this, entity, this.posX, this.posY, this.posZ);
+        }
     }
 
     public boolean attackEntity(Entity entity, int i)
@@ -65,6 +69,9 @@ public class EntityPlayerMP extends EntityPlayer
                     return false;
                 }
             }
+        }
+        for (EventListener l : mcServer.pluginManager.getListeners()) {
+            l.onPlayerAttack(this, entity, i);
         }
         return super.attackEntity(entity, i);
     }

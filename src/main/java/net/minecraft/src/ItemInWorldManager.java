@@ -3,6 +3,7 @@ package net.minecraft.src;
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
+import net.minecraft.server.*;
 
 public class ItemInWorldManager
 {
@@ -108,6 +109,9 @@ public class ItemInWorldManager
     {
         int i = itemstack.stackSize;
         ItemStack itemstack1 = itemstack.useItemRightClick(world, entityplayer);
+        for (EventListener l : MinecraftServer.instance.pluginManager.getListeners()) {
+            l.onPlayerInteract(entityplayer, itemstack);
+        }
         if(itemstack1 != itemstack || itemstack1 != null && itemstack1.stackSize != i)
         {
             entityplayer.inventory.mainInventory[entityplayer.inventory.currentItem] = itemstack1;

@@ -6,7 +6,7 @@ package net.minecraft.src;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.logging.Logger;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.*;
 
 public class NetServerHandler extends NetHandler
     implements ICommandListener
@@ -121,6 +121,9 @@ public class NetServerHandler extends NetHandler
                     logger.warning((new StringBuilder()).append(playerEntity.username).append(" had an illegal stance: ").append(d10).toString());
                 }
                 playerEntity.field_418_ai = packet10flying.stance;
+                for (EventListener l : mcServer.pluginManager.getListeners()) {
+                    l.onPlayerMove(playerEntity, d3, d5, d7);
+                }
             }
             if(packet10flying.rotating)
             {
@@ -239,6 +242,9 @@ public class NetServerHandler extends NetHandler
             double d8 = d2 * d2 + d4 * d4 + d6 * d6;
             if(d8 < 256D)
             {
+                for (EventListener l1 : mcServer.pluginManager.getListeners()) {
+                    l1.onBlockBreak(playerEntity, i, j, k, l);
+                }
                 playerEntity.field_421_a.sendPacket(new Packet53BlockChange(i, j, k, mcServer.worldMngr));
             }
         }
@@ -267,8 +273,12 @@ public class NetServerHandler extends NetHandler
             if(j1 > mcServer.spawnProtection || flag)
             {
                 ItemStack itemstack1 = packet15place.id < 0 ? null : new ItemStack(packet15place.id);
-                playerEntity.field_425_ad.func_327_a(playerEntity, mcServer.worldMngr, itemstack1, i, j, k, l);
+                if (itemstack1 != null) playerEntity.inventory.addItemStackToInventory(itemstack1);
             }
+            for (EventListener l1 : mcServer.pluginManager.getListeners()) {
+                l1.onBlockPlace(playerEntity, i, j, k, packet15place.id);
+            }
+
             playerEntity.field_421_a.sendPacket(new Packet53BlockChange(i, j, k, mcServer.worldMngr));
             if(l == 0)
             {
@@ -376,6 +386,9 @@ public class NetServerHandler extends NetHandler
             s = (new StringBuilder()).append("<").append(playerEntity.username).append("> ").append(s).toString();
             logger.info(s);
             mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat(s));
+            for (EventListener l : mcServer.pluginManager.getListeners()) {
+                l.onPlayerChat(playerEntity, s);
+            }
         }
     }
 

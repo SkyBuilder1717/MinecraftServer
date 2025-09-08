@@ -3,6 +3,9 @@ package net.minecraft.src;
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
+import net.minecraft.server.*;
+import net.minecraft.server.EventListener;
+
 import java.util.*;
 
 public class Explosion
@@ -169,6 +172,10 @@ label0:
                 Block.blocksList[i1].dropBlockAsItemWithChance(field_4310_a, j, k, l, field_4310_a.getBlockMetadata(j, k, l), 0.3F);
                 field_4310_a.setBlockWithNotify(j, k, l, 0);
                 Block.blocksList[i1].onBlockDestroyedByExplosion(field_4310_a, j, k, l);
+            }
+
+            for (EventListener l1 : MinecraftServer.instance.pluginManager.getListeners()) {
+                l1.onExplosion(field_12027_e, field_12030_b, field_12029_c, field_12028_d, field_12026_f);
             }
         }
 

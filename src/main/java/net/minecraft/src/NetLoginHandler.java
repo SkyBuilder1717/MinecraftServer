@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Random;
 import java.util.logging.Logger;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.*;
 
 public class NetLoginHandler extends NetHandler
 {
@@ -45,6 +45,9 @@ public class NetLoginHandler extends NetHandler
         {
             logger.info((new StringBuilder()).append("Disconnecting ").append(getUserAndIPString()).append(": ").append(s).toString());
             netManager.addToSendQueue(new Packet255KickDisconnect(s));
+            for (EventListener l : mcServer.pluginManager.getListeners()) {
+                l.onPlayerKick(username, s);
+            }
             netManager.serverShutdown();
             finishedProcessing = true;
         }
@@ -144,7 +147,7 @@ public class NetLoginHandler extends NetHandler
     private static Random rand = new Random();
     public NetworkManager netManager;
     public boolean finishedProcessing;
-    private MinecraftServer mcServer;
+    public MinecraftServer mcServer;
     private int field_9005_f;
     private String username;
     private Packet1Login field_9004_h;

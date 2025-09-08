@@ -3,6 +3,9 @@ package net.minecraft.src;
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
+import net.minecraft.server.EventListener;
+import net.minecraft.server.MinecraftServer;
+
 import java.io.*;
 import java.util.*;
 
@@ -862,6 +865,10 @@ public class World
             {
                 playerEntities.add((EntityPlayer)entity);
                 System.out.println((new StringBuilder()).append("Player count: ").append(playerEntities.size()).toString());
+            } else {
+                for (EventListener l : MinecraftServer.instance.pluginManager.getListeners()) {
+                    l.onEntitySpawn(entity);
+                }
             }
             getChunkFromChunkCoords(i, j).addEntity(entity);
             field_815_a.add(entity);

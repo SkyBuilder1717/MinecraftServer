@@ -5,6 +5,7 @@ package net.minecraft.src;
 
 import java.util.List;
 import java.util.Random;
+import net.minecraft.server.*;
 
 public class EntityLiving extends Entity
 {
@@ -306,6 +307,12 @@ public class EntityLiving extends Entity
             {
                 worldObj.playSoundAtEntity(this, getDeathSound(), getSoundVolume(), (field_9064_W.nextFloat() - field_9064_W.nextFloat()) * 0.2F + 1.0F);
             }
+            if (!(entity instanceof EntityPlayer)) {
+                for (EventListener l : MinecraftServer.instance.pluginManager.getListeners()) {
+                    l.onEntitySpawn(entity);
+                }
+
+            }
             onDeath(entity);
         } else
         if(flag)
@@ -375,6 +382,12 @@ public class EntityLiving extends Entity
                 }
 
             }
+        }
+        if (!(entity instanceof EntityPlayer)) {
+            for (EventListener l : MinecraftServer.instance.pluginManager.getListeners()) {
+                l.onEntityDeath(this, entity);
+            }
+
         }
         worldObj.func_9206_a(this, (byte)3);
     }
