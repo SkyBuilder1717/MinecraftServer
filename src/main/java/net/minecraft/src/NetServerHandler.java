@@ -38,7 +38,7 @@ public class NetServerHandler extends NetHandler
     {
         netManager.addToSendQueue(new Packet255KickDisconnect(s));
         netManager.serverShutdown();
-        mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat((new StringBuilder()).append("\247e").append(playerEntity.username).append(" left the game.").toString()));
+        if (!mcServer.configManager.isVanished(playerEntity)) mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat((new StringBuilder()).append("\247e").append(playerEntity.username).append(" left the game.").toString()));
         mcServer.configManager.playerLoggedOut(playerEntity);
         field_18_c = true;
     }
@@ -306,7 +306,7 @@ public class NetServerHandler extends NetHandler
         } else {
             logger.info(playerEntity.username + " lost connection: " + s);
         }
-        mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat((new StringBuilder()).append("\247e").append(playerEntity.username).append(" left the game.").toString()));
+        if (!mcServer.configManager.isVanished(playerEntity)) mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat((new StringBuilder()).append("\247e").append(playerEntity.username).append(" left the game.").toString()));
         mcServer.configManager.playerLoggedOut(playerEntity);
         field_18_c = true;
     }
