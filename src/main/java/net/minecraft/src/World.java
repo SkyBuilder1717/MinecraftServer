@@ -867,7 +867,7 @@ public class World
                 System.out.println((new StringBuilder()).append("Player count: ").append(playerEntities.size()).toString());
             } else {
                 for (EventListener l : MinecraftServer.instance.pluginManager.getListeners()) {
-                    l.onEntitySpawn(entity);
+                    l.onEntitySpawn(entity, entity.posX, entity.posY, entity.posZ);
                 }
             }
             getChunkFromChunkCoords(i, j).addEntity(entity);

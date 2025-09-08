@@ -20,9 +20,9 @@ public interface EventListener {
     default void onBlockBreak(EntityPlayerMP player, int x, int y, int z, int blockId) {}
     default void onExplosion(Entity exploder, double x, double y, double z, float power) {}
 
-    default void onEntitySpawn(Entity entity) {}
+    default void onEntitySpawn(Entity entity, double x, double y, double z) {}
     default void onEntityCollideWithPlayer(Entity collider, EntityPlayer player) {}
-    default void onEntityDeath(Entity entity, Entity reason) {}
+    default void onEntityDeath(Entity entity, Entity reason, double x, double y, double z) {}
 
     default void onServerTick(MinecraftServer server) {}
 }
