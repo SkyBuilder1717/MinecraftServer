@@ -5,7 +5,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
-@SuppressWarnings("resource")
 public class PluginManager {
     private final List<SASPlugin> plugins = new ArrayList<>();
     private final Map<SASPlugin, PluginConfig> pluginConfigs = new HashMap<>();
@@ -47,7 +46,6 @@ public class PluginManager {
 
                     try (InputStream is = jar.getInputStream(entry)) {
                         org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml();
-                        @SuppressWarnings("unchecked")
                         java.util.Map<String, Object> data = yaml.load(is);
 
                         String mainClass = (String) data.get("main");
@@ -78,7 +76,7 @@ public class PluginManager {
     }
 
     public void disablePlugins(MinecraftServer server) {
-        MinecraftServer.logger.warning("Disabling plugins");
+        MinecraftServer.logger.info("Disabling plugins");
         for (SASPlugin plugin : plugins) {
             try {
                 plugin.onDisable(server);
