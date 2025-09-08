@@ -9,6 +9,7 @@ public class ServerCommands {
     private static final HashMap<String, ICommand> commands = new HashMap<>();
 
     public static void register(String name, ICommand command) {
+        if (commands.containsKey(name.toLowerCase())) return;
         commands.put(name.toLowerCase(), command);
     }
 
