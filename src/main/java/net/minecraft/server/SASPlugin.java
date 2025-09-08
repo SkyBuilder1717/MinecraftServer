@@ -5,7 +5,7 @@ import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
 
 public abstract class SASPlugin {
-    protected PluginDescription descriptionYaml;
+    protected PluginDescription desc;
 
     public SASPlugin() {
         loadDescription();
@@ -16,39 +16,40 @@ public abstract class SASPlugin {
     public abstract void onDisable(MinecraftServer server);
 
     public PluginDescription getDescription() {
-        return descriptionYaml;
+        return desc;
     }
 
     private void loadDescription() {
+        desc = new PluginDescription();
+
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("plugin.yml")) {
             if (is == null) {
                 MinecraftServer.logger.warning("plugin.yml not found for " + getName());
-                descriptionYaml = new PluginDescription();
-                descriptionYaml.name = getName();
+                desc.name = getName();
                 return;
             }
 
             Yaml yaml = new Yaml();
+            @SuppressWarnings("unchecked")
             Map<String, Object> data = yaml.load(is);
 
-            descriptionYaml = new PluginDescription();
-            descriptionYaml.name = (String) data.get("name");
-            descriptionYaml.version = (String) data.get("version");
-            descriptionYaml.author = (String) data.get("author");
-            descriptionYaml.description = (String) data.get("description");
-            descriptionYaml.main = (String) data.get("main");
+            desc.name = data.get("name") != null ? data.get("name").toString() : getName();
+            desc.version = data.get("version") != null ? data.get("version").toString() : "";
+            desc.author = data.get("author") != null ? data.get("author").toString() : "";
+            desc.description = data.get("description") != null ? data.get("description").toString() : "";
+            desc.main = data.get("main") != null ? data.get("main").toString() : null;
 
-            if (descriptionYaml.name == null) {
+            if (desc.name == null || desc.name.isEmpty()) {
                 MinecraftServer.logger.warning("Plugin " + getName() + " has no 'name' in plugin.yml!");
+                desc.name = getName();
             }
-            if (descriptionYaml.main == null) {
+            if (desc.main == null || desc.main.isEmpty()) {
                 MinecraftServer.logger.warning("Plugin " + getName() + " has no 'main' in plugin.yml!");
             }
 
         } catch (Exception e) {
             MinecraftServer.logger.warning("Failed to load plugin.yml for " + getName() + ": " + e.getMessage());
-            descriptionYaml = new PluginDescription();
-            descriptionYaml.name = getName();
+            desc.name = getName();
         }
     }
 }
