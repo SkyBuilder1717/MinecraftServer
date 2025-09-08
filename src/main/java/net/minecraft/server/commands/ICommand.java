@@ -5,7 +5,9 @@ import net.minecraft.src.*;
 
 public interface ICommand {
     void execute(MinecraftServer server, ICommandListener sender, String[] args);
-    boolean OnlyOP();
+    default boolean OnlyOP() {
+        return false;
+    }
     String getParams();
     String getDescription();
 }

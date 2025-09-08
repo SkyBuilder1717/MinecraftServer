@@ -29,11 +29,6 @@ public class HelpCommand implements ICommand {
     }
 
     @Override
-    public boolean OnlyOP() {
-        return false;
-    }
-
-    @Override
     public String getParams() {
         return "[command]";
     }

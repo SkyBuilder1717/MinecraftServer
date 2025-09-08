@@ -21,11 +21,6 @@ public class SayCommand implements ICommand {
     }
 
     @Override
-    public boolean OnlyOP() {
-        return false;
-    }
-
-    @Override
     public String getParams() {
         return "<message>";
     }

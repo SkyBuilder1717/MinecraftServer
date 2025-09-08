@@ -8,6 +8,21 @@ import java.util.*;
 @SuppressWarnings("resource")
 public class PluginManager {
     private final List<SASPlugin> plugins = new ArrayList<>();
+    private final Map<SASPlugin, PluginConfig> pluginConfigs = new HashMap<>();
+    private final List<EventListener> listeners = new ArrayList<>();
+
+    public void registerPlugin(SASPlugin plugin) {
+        for (SASPlugin p : plugins) {
+            if (p.getName().equalsIgnoreCase(plugin.getName())) {
+                MinecraftServer.logger.warning(
+                        "Plugin " + plugin.getName() + " is already loaded! Skipping..."
+                );
+                return;
+            }
+        }
+        plugins.add(plugin);
+        MinecraftServer.logger.info(plugin.getName() + " loaded.");
+    }
 
     public void loadPlugins(MinecraftServer server) {
         File pluginDir = new File("plugins");
@@ -38,11 +53,9 @@ public class PluginManager {
                 if (obj instanceof SASPlugin) {
                     SASPlugin plugin = (SASPlugin) obj;
                     plugin.onEnable(server);
-                    plugins.add(plugin);
-                    plugin.createConfig();
-                    MinecraftServer.logger.info("Loaded plugin: " + plugin.getName());
+                    registerPlugin(plugin);
                 } else {
-                    MinecraftServer.logger.warning("Class " + mainClass + " does not implement Plugin!");
+                    MinecraftServer.logger.warning("Main class " + mainClass + " does not implement SASPlugin!");
                 }
             } catch (Exception e) {
                 MinecraftServer.logger.warning("Failed to load plugin " + file.getName() + ": " + e.getMessage());
@@ -60,8 +73,6 @@ public class PluginManager {
             }
         }
     }
-
-    private final Map<SASPlugin, PluginConfig> pluginConfigs = new HashMap<>();
 
     public PluginConfig createConfig(SASPlugin plugin, String fileName) {
         File folder;
@@ -86,13 +97,15 @@ public class PluginManager {
         return pluginConfigs.get(plugin);
     }
 
-    private final List<EventListener> listeners = new ArrayList<>();
-
     public void registerListener(EventListener listener) {
         if (listener != null) listeners.add(listener);
     }
 
     public List<EventListener> getListeners() {
         return listeners;
+    }
+
+    public List<SASPlugin> getPlugins() {
+        return plugins;
     }
 }

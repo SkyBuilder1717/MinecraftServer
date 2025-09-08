@@ -40,13 +40,8 @@ public class TimeCommand implements ICommand {
     }
 
     @Override
-    public boolean OnlyOP() {
-        return false;
-    }
-
-    @Override
     public String getParams() {
-        return "[num]";
+        return "[time]";
     }
 
     @Override
