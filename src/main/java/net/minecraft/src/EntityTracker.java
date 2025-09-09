@@ -22,7 +22,7 @@ public class EntityTracker
         if (entity instanceof EntityPlayerMP)
         {
             func_6187_a(entity, 512, 2);
-            EntityPlayerMP newPlayer = (EntityPlayerMP)entity;
+            EntityPlayerMP newPlayer = (EntityPlayerMP) entity;
             boolean newIsVanished = mcServer.configManager.isVanished(newPlayer);
 
             for (Iterator it = field_911_a.iterator(); it.hasNext();)
@@ -34,7 +34,7 @@ public class EntityTracker
 
                 if (tracked instanceof EntityPlayerMP)
                 {
-                    EntityPlayerMP trackedPlayer = (EntityPlayerMP)tracked;
+                    EntityPlayerMP trackedPlayer = (EntityPlayerMP) tracked;
                     boolean trackedIsVanished = mcServer.configManager.isVanished(trackedPlayer);
 
                     if (trackedIsVanished)
@@ -53,11 +53,11 @@ public class EntityTracker
                 }
             }
 
-            List visiblePlayers = new ArrayList();
-            for (Object o : mcServer.worldMngr.playerEntities)
+            List<EntityPlayerMP> visiblePlayers = new ArrayList();
+            for (EntityPlayerMP o : mcServer.worldMngr.playerEntities)
             {
                 if (!(o instanceof EntityPlayerMP)) continue;
-                EntityPlayerMP player = (EntityPlayerMP)o;
+                EntityPlayerMP player = o;
                 if (player == newPlayer) continue;
 
                 if (newIsVanished)
@@ -140,10 +140,10 @@ public class EntityTracker
             boolean trackedIsVanished = false;
             if (trackedIsPlayer) trackedIsVanished = mcServer.configManager.isVanished((EntityPlayerMP)entity);
 
-            for (Object o : mcServer.worldMngr.playerEntities)
+            for (EntityPlayerMP o : mcServer.worldMngr.playerEntities)
             {
-                if (!(o instanceof EntityPlayerMP)) continue;
-                EntityPlayerMP player = (EntityPlayerMP)o;
+                if (o == null) continue;
+                EntityPlayerMP player = o;
                 if (player == entity) continue;
 
                 if (trackedIsPlayer)
@@ -174,7 +174,7 @@ public class EntityTracker
     {
         if(entity instanceof EntityPlayerMP)
         {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)entity;
+            EntityPlayerMP entityplayermp = (EntityPlayerMP) entity;
             EntityTrackerEntry entitytrackerentry1;
             for(Iterator iterator = field_911_a.iterator(); iterator.hasNext(); entitytrackerentry1.func_12019_a(entityplayermp))
             {
@@ -204,10 +204,10 @@ public class EntityTracker
             boolean trackedIsVanished = false;
             if (trackedIsPlayer) trackedIsVanished = mcServer.configManager.isVanished((EntityPlayerMP)tracked);
 
-            for (Object o : mcServer.worldMngr.playerEntities)
+            for (EntityPlayerMP o : mcServer.worldMngr.playerEntities)
             {
-                if (!(o instanceof EntityPlayerMP)) continue;
-                EntityPlayerMP player = (EntityPlayerMP)o;
+                if (o == null) continue;
+                EntityPlayerMP player = o;
                 if (player == tracked) continue;
 
                 if (trackedIsPlayer)
@@ -239,7 +239,7 @@ public class EntityTracker
         label0:
         for(int i = 0; i < arraylist.size(); i++)
         {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)arraylist.get(i);
+            EntityPlayerMP entityplayermp = (EntityPlayerMP) arraylist.get(i);
             Iterator iterator1 = field_911_a.iterator();
             do
             {
@@ -255,7 +255,7 @@ public class EntityTracker
 
                 if(entitytrackerentry1.field_909_a instanceof EntityPlayerMP)
                 {
-                    EntityPlayerMP trackedPlayer = (EntityPlayerMP)entitytrackerentry1.field_909_a;
+                    EntityPlayerMP trackedPlayer = (EntityPlayerMP) entitytrackerentry1.field_909_a;
                     boolean trackedIsVanished = mcServer.configManager.isVanished(trackedPlayer);
 
                     if(trackedIsVanished)

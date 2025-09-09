@@ -113,7 +113,7 @@ class PlayerInstance
     {
         for(int i = 0; i < field_1072_b.size(); i++)
         {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)field_1072_b.get(i);
+            EntityPlayerMP entityplayermp = (EntityPlayerMP) field_1072_b.get(i);
             if(entityplayermp.field_420_ah.contains(field_1069_e))
             {
                 entityplayermp.field_421_a.sendPacket(packet);

@@ -158,7 +158,7 @@ public class EntityTrackerEntry
         EntityPlayerMP entityplayermp;
         for(Iterator iterator = field_899_k.iterator(); iterator.hasNext(); entityplayermp.field_421_a.sendPacket(packet))
         {
-            entityplayermp = (EntityPlayerMP)iterator.next();
+            entityplayermp = (EntityPlayerMP) iterator.next();
         }
 
     }

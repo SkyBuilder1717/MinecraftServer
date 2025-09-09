@@ -15,19 +15,23 @@ public class ServerConfigurationManager
     public ServerConfigurationManager(MinecraftServer minecraftserver)
     {
         playerEntities = new ArrayList();
-        field_9252_f = new HashSet();
+        whiteListedPlayers = new HashSet();
+        bannedPlayers = new HashSet();
         bannedIPs = new HashSet();
         ops = new HashSet();
         mcServer = minecraftserver;
         bannedPlayersFile = minecraftserver.getFile("banned-players.txt");
         ipBanFile = minecraftserver.getFile("banned-ips.txt");
         opFile = minecraftserver.getFile("ops.txt");
+        whiteListedPlayersFile = minecraftserver.getFile("whitelist.txt");
         playerManagerObj = new PlayerManager(minecraftserver);
         maxPlayers = minecraftserver.propertyManagerObj.getIntProperty("max-players", 20);
         readBannedPlayers();
+        readWhiteListedPlayers();
         loadBannedList();
         loadOps();
         writeBannedPlayers();
+        writeWhiteListedPlayers();
         saveBannedList();
         saveOps();
     }
@@ -58,8 +62,8 @@ public class ServerConfigurationManager
     public void hidePlayer(EntityPlayerMP player) {
         mcServer.vanishedPlayers.put(player, true);
         Packet29DestroyEntity destroy = new Packet29DestroyEntity(player.field_331_c);
-        for (Object o : playerEntities) {
-            EntityPlayerMP other = (EntityPlayerMP) o;
+        for (EntityPlayerMP o : playerEntities) {
+            EntityPlayerMP other = o;
             if (other != player) {
                 other.field_421_a.sendPacket(destroy);
             }
@@ -68,8 +72,8 @@ public class ServerConfigurationManager
 
     public void showPlayer(EntityPlayerMP player) {
         mcServer.vanishedPlayers.remove(player);
-        for (Object o : mcServer.worldMngr.playerEntities) {
-            EntityPlayerMP other = (EntityPlayerMP) o;
+        for (EntityPlayerMP o : mcServer.worldMngr.playerEntities) {
+            EntityPlayerMP other = o;
             if (other != player && !mcServer.configManager.isVanished(other)) {
                 other.field_421_a.sendPacket(new Packet20NamedEntitySpawn(player));
             }
@@ -95,7 +99,8 @@ public class ServerConfigurationManager
 
     public EntityPlayerMP login(NetLoginHandler netloginhandler, String s, String s1)
     {
-        if(field_9252_f.contains(s.trim().toLowerCase()))
+        String nickname = s.trim().toLowerCase();
+        if(bannedPlayers.contains(nickname))
         {
             netloginhandler.kickUser("You are banned from this server!");
             return null;
@@ -108,6 +113,11 @@ public class ServerConfigurationManager
             netloginhandler.kickUser("Your IP address is banned from this server!");
             return null;
         }
+        if(mcServer.whiteList && !isOp(nickname) && !whiteListedPlayers.contains(nickname))
+        {
+            netloginhandler.kickUser("You are not whitelisted on this server!");
+            return null;
+        }
         if(playerEntities.size() >= maxPlayers)
         {
             netloginhandler.kickUser("The server is full!");
@@ -115,7 +125,7 @@ public class ServerConfigurationManager
         }
         for(int i = 0; i < playerEntities.size(); i++)
         {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)playerEntities.get(i);
+            EntityPlayerMP entityplayermp = playerEntities.get(i);
             if(entityplayermp.username.equalsIgnoreCase(s))
             {
                 entityplayermp.field_421_a.func_43_c("You logged in from another location");
@@ -162,39 +172,110 @@ public class ServerConfigurationManager
     {
         for(int i = 0; i < playerEntities.size(); i++)
         {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)playerEntities.get(i);
+            EntityPlayerMP entityplayermp = playerEntities.get(i);
             entityplayermp.field_421_a.sendPacket(packet);
         }
     }
 
-    public boolean isVanished(EntityPlayerMP player) {
+    public boolean isVanished(EntityPlayer player) {
         return mcServer.vanishedPlayers.containsKey(player);
     }
 
     public String getPlayerList()
     {
-        String s = "";
-        for(int i = 0; i < playerEntities.size(); i++)
+        StringBuilder s = new StringBuilder();
+        List<EntityPlayerMP> visiblePlayers = new ArrayList<>();
+        for(int i = 0; i < playerEntities.size(); i++) {
+            if (!isVanished(playerEntities.get(i))) visiblePlayers.add(playerEntities.get(i));
+        }
+        
+        for(int i = 0; i < visiblePlayers.size(); i++)
         {
             if(i > 0)
             {
-                s = (new StringBuilder()).append(s).append(", ").toString();
+                s.append(", ");
             }
-            s = (new StringBuilder()).append(s).append(((EntityPlayerMP)playerEntities.get(i)).username).toString();
+            s.append(playerEntities.get(i).username);
         }
 
-        return s;
+        return s.toString();
+    }
+
+    public String getWhitelist()
+    {
+        StringBuilder s = new StringBuilder();
+
+        for(int i = 0; i < whiteListedPlayers.size(); i++)
+        {
+            if(i > 0)
+            {
+                s.append(", ");
+            }
+            s.append(whiteListedPlayers.toArray()[i]);
+        }
+
+        return s.toString();
+    }
+
+    public void whitelistPlayer(String s)
+    {
+        whiteListedPlayers.add(s.toLowerCase());
+        writeWhiteListedPlayers();
+    }
+
+    public void removeWhitelistPlayer(String s)
+    {
+        whiteListedPlayers.remove(s.toLowerCase());
+        writeWhiteListedPlayers();
+    }
+
+    private void readWhiteListedPlayers()
+    {
+        try
+        {
+            whiteListedPlayers.clear();
+            BufferedReader bufferedreader = new BufferedReader(new FileReader(whiteListedPlayersFile));
+            for(String s = ""; (s = bufferedreader.readLine()) != null;)
+            {
+                whiteListedPlayers.add(s.trim().toLowerCase());
+            }
+
+            bufferedreader.close();
+        }
+        catch(Exception exception)
+        {
+            logger.warning((new StringBuilder()).append("Failed to load whitelist: ").append(exception).toString());
+        }
+    }
+
+    private void writeWhiteListedPlayers()
+    {
+        try
+        {
+            PrintWriter printwriter = new PrintWriter(new FileWriter(whiteListedPlayersFile, false));
+            String s;
+            for(Iterator iterator = whiteListedPlayers.iterator(); iterator.hasNext(); printwriter.println(s))
+            {
+                s = (String)iterator.next();
+            }
+
+            printwriter.close();
+        }
+        catch(Exception exception)
+        {
+            logger.warning((new StringBuilder()).append("Failed to save whitelist: ").append(exception).toString());
+        }
     }
 
     public void banPlayer(String s)
     {
-        field_9252_f.add(s.toLowerCase());
+        bannedPlayers.add(s.toLowerCase());
         writeBannedPlayers();
     }
 
     public void unbanPlayer(String s)
     {
-        field_9252_f.remove(s.toLowerCase());
+        bannedPlayers.remove(s.toLowerCase());
         writeBannedPlayers();
     }
 
@@ -202,11 +283,11 @@ public class ServerConfigurationManager
     {
         try
         {
-            field_9252_f.clear();
+            bannedPlayers.clear();
             BufferedReader bufferedreader = new BufferedReader(new FileReader(bannedPlayersFile));
             for(String s = ""; (s = bufferedreader.readLine()) != null;)
             {
-                field_9252_f.add(s.trim().toLowerCase());
+                bannedPlayers.add(s.trim().toLowerCase());
             }
 
             bufferedreader.close();
@@ -223,7 +304,7 @@ public class ServerConfigurationManager
         {
             PrintWriter printwriter = new PrintWriter(new FileWriter(bannedPlayersFile, false));
             String s;
-            for(Iterator iterator = field_9252_f.iterator(); iterator.hasNext(); printwriter.println(s))
+            for(Iterator iterator = bannedPlayers.iterator(); iterator.hasNext(); printwriter.println(s))
             {
                 s = (String)iterator.next();
             }
@@ -345,7 +426,7 @@ public class ServerConfigurationManager
     {
         for(int i = 0; i < playerEntities.size(); i++)
         {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)playerEntities.get(i);
+            EntityPlayerMP entityplayermp = playerEntities.get(i);
             if(entityplayermp.username.equalsIgnoreCase(s))
             {
                 return entityplayermp;
@@ -368,7 +449,7 @@ public class ServerConfigurationManager
     {
         for(int i = 0; i < playerEntities.size(); i++)
         {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)playerEntities.get(i);
+            EntityPlayerMP entityplayermp = playerEntities.get(i);
             double d4 = d - entityplayermp.posX;
             double d5 = d1 - entityplayermp.posY;
             double d6 = d2 - entityplayermp.posZ;
@@ -385,7 +466,7 @@ public class ServerConfigurationManager
         Packet3Chat packet3chat = new Packet3Chat(s);
         for(int i = 0; i < playerEntities.size(); i++)
         {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)playerEntities.get(i);
+            EntityPlayerMP entityplayermp = playerEntities.get(i);
             if(isOp(entityplayermp.username))
             {
                 entityplayermp.field_421_a.sendPacket(packet3chat);
@@ -416,19 +497,25 @@ public class ServerConfigurationManager
     {
         for(int i = 0; i < playerEntities.size(); i++)
         {
-            playerNBTManagerObj.writePlayerData((EntityPlayerMP)playerEntities.get(i));
+            playerNBTManagerObj.writePlayerData(playerEntities.get(i));
         }
 
     }
 
+    public Set getWhiteListedPlayers() {
+        return whiteListedPlayers;
+    }
+
     public static Logger logger = Logger.getLogger("Minecraft");
-    public List playerEntities;
+    public List<EntityPlayerMP> playerEntities;
     private MinecraftServer mcServer;
     private PlayerManager playerManagerObj;
     private int maxPlayers;
-    private Set field_9252_f;
+    private Set bannedPlayers;
+    private Set whiteListedPlayers;
     private Set bannedIPs;
     private Set ops;
+    private File whiteListedPlayersFile;
     private File bannedPlayersFile;
     private File ipBanFile;
     private File opFile;

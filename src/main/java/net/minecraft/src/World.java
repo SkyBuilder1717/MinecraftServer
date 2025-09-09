@@ -863,7 +863,7 @@ public class World
         {
             if(entity instanceof EntityPlayer)
             {
-                playerEntities.add((EntityPlayer)entity);
+                playerEntities.add((EntityPlayerMP) entity);
                 System.out.println((new StringBuilder()).append("Player count: ").append(playerEntities.size()).toString());
             } else {
                 for (EventListener l : MinecraftServer.instance.pluginManager.getListeners()) {
@@ -2011,7 +2011,7 @@ public class World
     public void sendAnimationPacket(Entity entity, int animationId) {
         Packet18ArmAnimation packet = new Packet18ArmAnimation(entity, animationId);
         for (int i = 0; i < playerEntities.size(); i++) {
-            EntityPlayerMP player = (EntityPlayerMP)playerEntities.get(i);
+            EntityPlayerMP player = playerEntities.get(i);
             player.field_421_a.sendPacket(packet);
         }
     }
@@ -2023,7 +2023,7 @@ public class World
     private TreeSet scheduledTickTreeSet;
     private Set scheduledTickSet;
     public List field_814_b;
-    public List playerEntities;
+    public List<EntityPlayerMP> playerEntities;
     public long worldTime;
     private long field_6159_E;
     public int skylightSubtracted;

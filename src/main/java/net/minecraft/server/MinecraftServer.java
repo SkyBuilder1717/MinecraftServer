@@ -37,8 +37,11 @@ public class MinecraftServer
         new ThreadSleepForever(this);
 
         ServerCommands.register("help", new HelpCommand());
+        ServerCommands.register("list", new ListCommand());
         ServerCommands.register("heal", new HealCommand());
         ServerCommands.register("kill", new KillCommand());
+        ServerCommands.register("kick", new KickCommand());
+        ServerCommands.register("clear", new ClearCommand());
         ServerCommands.register("give", new GiveCommand());
         ServerCommands.register("tp", new TpCommand());
         ServerCommands.register("tell", new TellCommand());
@@ -47,18 +50,16 @@ public class MinecraftServer
         ServerCommands.register("ban-ip", new BanIpCommand());
         ServerCommands.register("pardon", new PardonCommand());
         ServerCommands.register("pardon-ip", new PardonIpCommand());
-        ServerCommands.register("vanish", new VanishCommand());
         ServerCommands.register("save-all", new SaveAllCommand());
         ServerCommands.register("save-on", new SaveOnCommand());
         ServerCommands.register("save-off", new SaveOffCommand());
-        ServerCommands.register("kick", new KickCommand());
         ServerCommands.register("stop", new StopCommand());
         ServerCommands.register("summon", new SummonCommand());
+        ServerCommands.register("say", new SayCommand());
         ServerCommands.register("op", new OpCommand());
         ServerCommands.register("deop", new DeopCommand());
-        ServerCommands.register("say", new SayCommand());
         ServerCommands.register("plugins", new PluginsCommand());
-        ServerCommands.register("clear", new ClearCommand());
+        ServerCommands.register("vanish", new VanishCommand());
 
     }
 
@@ -80,6 +81,8 @@ public class MinecraftServer
         onlineMode = propertyManagerObj.getBooleanProperty("online-mode", true);
         spawnProtection = propertyManagerObj.getIntProperty("spawn-protection", 16);
         noAnimals = propertyManagerObj.getBooleanProperty("spawn-animals", true);
+        whiteList = propertyManagerObj.getBooleanProperty("whitelist", false);
+        if (whiteList) ServerCommands.register("whitelist", new WhitelistCommand());
         InetAddress inetaddress = null;
         if(!s.isEmpty())
         {
@@ -161,10 +164,9 @@ public class MinecraftServer
 
         if(configManager != null) {
             configManager.sendPacketToAllPlayers(new Packet3Chat("Server shutting down"));
-            for (Object obj : configManager.playerEntities) {
-                EntityPlayerMP player = (EntityPlayerMP) obj;
-                if(player != null && player.field_421_a != null) {
-                    player.field_421_a.sendPacket(new Packet255KickDisconnect("Server shutting down"));
+            for (EntityPlayerMP obj : configManager.playerEntities) {
+                if(obj != null && obj.field_421_a != null) {
+                    obj.field_421_a.sendPacket(new Packet255KickDisconnect("Server shutting down"));
                 }
             }
             configManager.savePlayerStates();
@@ -357,6 +359,7 @@ public class MinecraftServer
     public EntityTracker field_6028_k;
     public boolean onlineMode;
     public boolean noAnimals;
-    public final HashMap<EntityPlayerMP, Boolean> vanishedPlayers = new HashMap<>();
+    public boolean whiteList;
+    public final HashMap<EntityPlayer, Boolean> vanishedPlayers = new HashMap<>();
     public static MinecraftServer instance;
 }
