@@ -58,6 +58,7 @@ public class MinecraftServer
         ServerCommands.register("deop", new DeopCommand());
         ServerCommands.register("say", new SayCommand());
         ServerCommands.register("plugins", new PluginsCommand());
+        ServerCommands.register("clear", new ClearCommand());
 
     }
 
