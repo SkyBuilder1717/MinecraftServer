@@ -17,7 +17,7 @@ public interface EventListener {
     default void onPlayerCommand(ICommandListener sender, String command, String[] args) {}
 
     default void onBlockPlace(EntityPlayerMP player, int x, int y, int z, int blockId) {}
-    default void onBlockBreak(EntityPlayerMP player, int x, int y, int z, int blockId) {}
+    default void onBlockBreak(EntityPlayerMP player, int x, int y, int z, int face) {}
     default void onExplosion(Entity exploder, double x, double y, double z, float power) {}
 
     default void onEntitySpawn(Entity entity, double x, double y, double z) {}
