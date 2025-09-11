@@ -4,7 +4,8 @@ package net.minecraft.src;
 // Decompiler options: packimports(3) braces deadcode 
 
 import java.io.*;
-import java.net.URL;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 import net.minecraft.server.*;
 
 class ThreadLoginVerifier extends Thread
@@ -16,29 +17,30 @@ class ThreadLoginVerifier extends Thread
         loginPacket = packet1login;
     }
 
-    public void run()
-    {
-        try
-        {
-            String s = NetLoginHandler.getServerId(loginHandler);
-            URL url = new URL("https://session.minecraft.net/game/checkserver.jsp?user=" + loginPacket.username + "&serverId=" + s);
-            BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(url.openStream()));
-            String s1 = bufferedreader.readLine();
-            bufferedreader.close();
-            if(s1.equals("YES"))
-            {
+    public void run() {
+        try {
+            String serverId = NetLoginHandler.getServerId(loginHandler);
+            String username = loginPacket.username;
+
+            URL url = new URL("https://sessionserver.mojang.com/session/minecraft/hasJoined?username="
+                    + URLEncoder.encode(username, "UTF-8")
+                    + "&serverId=" + URLEncoder.encode(serverId, "UTF-8"));
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
+            String response = reader.readLine();
+            reader.close();
+
+            if (response != null && !response.trim().isEmpty()) {
                 NetLoginHandler.setLoginPacket(loginHandler, loginPacket);
                 for (EventListener l : loginHandler.mcServer.pluginManager.getListeners()) {
                     l.onPlayerLogin(loginPacket.username);
                 }
-            } else
-            {
+            } else {
                 loginHandler.kickUser("Failed to verify username!");
             }
-        }
-        catch(Exception exception)
-        {
+        } catch (Exception exception) {
             ExceptionLogger.log(exception);
+            loginHandler.kickUser("Verification error: " + exception.getMessage());
         }
     }
 
