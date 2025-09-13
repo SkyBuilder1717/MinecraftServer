@@ -15,6 +15,7 @@ Was decompiled through [Mod Creator Pack 2.5 for Minecraft Alpha 1.2.6](http://w
 * /kill — Kills certain player.
 * /summon — Spawns entity.
 * /time — Sets time for world.
+* /whitelist — Manage whitelist. 
 
 *More coming soon...*
 
