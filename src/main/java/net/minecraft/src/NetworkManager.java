@@ -1,261 +1,219 @@
 package net.minecraft.src;
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3) braces deadcode 
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public class NetworkManager
-{
+public class NetworkManager {
+	public static final Object threadSyncObject = new Object();
+	public static int numReadThreads;
+	public static int numWriteThreads;
+	private Object sendQueueLock = new Object();
+	private Socket networkSocket;
+	private final SocketAddress field_12032_f;
+	private DataInputStream socketInputStream;
+	private DataOutputStream socketOutputStream;
+	private boolean isRunning = true;
+	private List readPackets = Collections.synchronizedList(new ArrayList());
+	private List dataPackets = Collections.synchronizedList(new ArrayList());
+	private List chunkDataPackets = Collections.synchronizedList(new ArrayList());
+	private NetHandler netHandler;
+	private boolean isServerTerminating = false;
+	private Thread writeThread;
+	private Thread readThread;
+	private boolean isTerminating = false;
+	private String terminationReason = "";
+	private int timeSinceLastRead = 0;
+	private int sendQueueByteLength = 0;
+	private int chunkDataSendCounter = 0;
 
-    public NetworkManager(Socket socket, String s, NetHandler nethandler) throws IOException
-    {
-        sendQueueLock = new Object();
-        isRunning = true;
-        readPackets = Collections.synchronizedList(new ArrayList());
-        dataPackets = Collections.synchronizedList(new ArrayList());
-        chunkDataPackets = Collections.synchronizedList(new ArrayList());
-        isServerTerminating = false;
-        isTerminating = false;
-        terminationReason = "";
-        timeSinceLastRead = 0;
-        sendQueueByteLength = 0;
-        chunkDataSendCounter = 0;
-        networkSocket = socket;
-        field_12032_f = socket.getRemoteSocketAddress();
-        netHandler = nethandler;
-        socket.setTrafficClass(24);
-        socketInputStream = new DataInputStream(socket.getInputStream());
-        socketOutputStream = new DataOutputStream(socket.getOutputStream());
-        readThread = new NetworkReaderThread(this, (new StringBuilder()).append(s).append(" read thread").toString());
-        writeThread = new NetworkWriterThread(this, (new StringBuilder()).append(s).append(" write thread").toString());
-        readThread.start();
-        writeThread.start();
-    }
+	public NetworkManager(Socket var1, String var2, NetHandler var3) throws IOException {
+		this.networkSocket = var1;
+		this.field_12032_f = var1.getRemoteSocketAddress();
+		this.netHandler = var3;
+		var1.setTrafficClass(24);
+		this.socketInputStream = new DataInputStream(var1.getInputStream());
+		this.socketOutputStream = new DataOutputStream(var1.getOutputStream());
+		this.readThread = new NetworkReaderThread(this, var2 + " read thread");
+		this.writeThread = new NetworkWriterThread(this, var2 + " write thread");
+		this.readThread.start();
+		this.writeThread.start();
+	}
 
-    public void setNetHandler(NetHandler nethandler)
-    {
-        netHandler = nethandler;
-    }
+	public void setNetHandler(NetHandler var1) {
+		this.netHandler = var1;
+	}
 
-    public void addToSendQueue(Packet packet)
-    {
-        if(isServerTerminating)
-        {
-            return;
-        }
-        synchronized(sendQueueLock)
-        {
-            sendQueueByteLength += packet.getPacketSize() + 1;
-            if(packet.isChunkDataPacket)
-            {
-                chunkDataPackets.add(packet);
-            } else
-            {
-                dataPackets.add(packet);
-            }
-        }
-    }
+	public void addToSendQueue(Packet var1) {
+		if(!this.isServerTerminating) {
+			Object var2 = this.sendQueueLock;
+			synchronized(var2) {
+				this.sendQueueByteLength += var1.getPacketSize() + 1;
+				if(var1.isChunkDataPacket) {
+					this.chunkDataPackets.add(var1);
+				} else {
+					this.dataPackets.add(var1);
+				}
 
-    private void sendPacket()
-    {
-        try
-        {
-            boolean flag = true;
-            if(!dataPackets.isEmpty())
-            {
-                flag = false;
-                Packet packet;
-                synchronized(sendQueueLock)
-                {
-                    packet = (Packet)dataPackets.remove(0);
-                    sendQueueByteLength -= packet.getPacketSize() + 1;
-                }
-                Packet.writePacket(packet, socketOutputStream);
-            }
-            if((flag || chunkDataSendCounter-- <= 0) && !chunkDataPackets.isEmpty())
-            {
-                flag = false;
-                Packet packet1;
-                synchronized(sendQueueLock)
-                {
-                    packet1 = (Packet)chunkDataPackets.remove(0);
-                    sendQueueByteLength -= packet1.getPacketSize() + 1;
-                }
-                Packet.writePacket(packet1, socketOutputStream);
-                chunkDataSendCounter = 50;
-            }
-            if(flag)
-            {
-                Thread.sleep(10L);
-            }
-        }
-        catch(InterruptedException interruptedexception) { }
-        catch(Exception exception)
-        {
-            if(!isTerminating)
-            {
-                onNetworkError(exception);
-            }
-        }
-    }
+			}
+		}
+	}
 
-    private void readPacket()
-    {
-        try
-        {
-            Packet packet = Packet.readPacket(socketInputStream);
-            if(packet != null)
-            {
-                readPackets.add(packet);
-            } else
-            {
-                networkShutdown("End of stream");
-            }
-        }
-        catch(Exception exception)
-        {
-            if(!isTerminating)
-            {
-                onNetworkError(exception);
-            }
-        }
-    }
+	private void sendPacket() {
+		try {
+			boolean var1 = true;
+			Packet var2;
+			Object var3;
+			if(!this.dataPackets.isEmpty()) {
+				var1 = false;
+				var3 = this.sendQueueLock;
+				synchronized(var3) {
+					var2 = (Packet)this.dataPackets.remove(0);
+					this.sendQueueByteLength -= var2.getPacketSize() + 1;
+				}
 
-    private void onNetworkError(Exception exception)
-    {
-        ExceptionLogger.log(exception);
-        networkShutdown((new StringBuilder()).append("Internal exception: ").append(exception.toString()).toString());
-    }
+				Packet.writePacket(var2, this.socketOutputStream);
+			}
 
-    public void networkShutdown(String s)
-    {
-        if(!isRunning)
-        {
-            return;
-        }
-        isTerminating = true;
-        terminationReason = s;
-        (new NetworkMasterThread(this)).start();
-        isRunning = false;
-        try
-        {
-            socketInputStream.close();
-            socketInputStream = null;
-        }
-        catch(Throwable throwable) { }
-        try
-        {
-            socketOutputStream.close();
-            socketOutputStream = null;
-        }
-        catch(Throwable throwable1) { }
-        try
-        {
-            networkSocket.close();
-            networkSocket = null;
-        }
-        catch(Throwable throwable2) { }
-    }
+			if((var1 || this.chunkDataSendCounter-- <= 0) && !this.chunkDataPackets.isEmpty()) {
+				var1 = false;
+				var3 = this.sendQueueLock;
+				synchronized(var3) {
+					var2 = (Packet)this.chunkDataPackets.remove(0);
+					this.sendQueueByteLength -= var2.getPacketSize() + 1;
+				}
 
-    public void processReadPackets()
-    {
-        if(sendQueueByteLength > 0x100000)
-        {
-            networkShutdown("Send buffer overflow");
-        }
-        if(readPackets.isEmpty())
-        {
-            if(timeSinceLastRead++ == 1200)
-            {
-                networkShutdown("Timed out");
-            }
-        } else
-        {
-            timeSinceLastRead = 0;
-        }
-        Packet packet;
-        for(int i = 100; !readPackets.isEmpty() && i-- >= 0; packet.processPacket(netHandler))
-        {
-            packet = (Packet)readPackets.remove(0);
-        }
+				Packet.writePacket(var2, this.socketOutputStream);
+				this.chunkDataSendCounter = 50;
+			}
 
-        if(isTerminating && readPackets.isEmpty())
-        {
-            netHandler.handleErrorMessage(terminationReason);
-        }
-    }
+			if(var1) {
+				Thread.sleep(10L);
+			}
+		} catch (InterruptedException var8) {
+		} catch (Exception var9) {
+			if(!this.isTerminating) {
+				this.onNetworkError(var9);
+			}
+		}
 
-    public SocketAddress getRemoteAddress()
-    {
-        return field_12032_f;
-    }
+	}
 
-    public void serverShutdown()
-    {
-        isServerTerminating = true;
-        readThread.interrupt();
-        (new ThreadMonitorConnection(this)).start();
-    }
+	private void readPacket() {
+		try {
+			Packet var1 = Packet.readPacket(this.socketInputStream);
+			if(var1 != null) {
+				this.readPackets.add(var1);
+			} else {
+				this.networkShutdown("End of stream");
+			}
+		} catch (Exception var2) {
+			if(!this.isTerminating) {
+				this.onNetworkError(var2);
+			}
+		}
 
-    public int getNumChunkDataPackets()
-    {
-        return chunkDataPackets.size();
-    }
+	}
 
-    static boolean isRunning(NetworkManager networkmanager)
-    {
-        return networkmanager.isRunning;
-    }
+	private void onNetworkError(Exception var1) {
+		var1.printStackTrace();
+		this.networkShutdown("Internal exception: " + var1.toString());
+	}
 
-    static boolean isServerTerminating(NetworkManager networkmanager)
-    {
-        return networkmanager.isServerTerminating;
-    }
+	public void networkShutdown(String var1) {
+		if(this.isRunning) {
+			this.isTerminating = true;
+			this.terminationReason = var1;
+			(new NetworkMasterThread(this)).start();
+			this.isRunning = false;
 
-    static void readNetworkPacket(NetworkManager networkmanager)
-    {
-        networkmanager.readPacket();
-    }
+			try {
+				this.socketInputStream.close();
+				this.socketInputStream = null;
+			} catch (Throwable var5) {
+			}
 
-    static void sendNetworkPacket(NetworkManager networkmanager)
-    {
-        networkmanager.sendPacket();
-    }
+			try {
+				this.socketOutputStream.close();
+				this.socketOutputStream = null;
+			} catch (Throwable var4) {
+			}
 
-    static Thread getReadThread(NetworkManager networkmanager)
-    {
-        return networkmanager.readThread;
-    }
+			try {
+				this.networkSocket.close();
+				this.networkSocket = null;
+			} catch (Throwable var3) {
+			}
 
-    static Thread getWriteThread(NetworkManager networkmanager)
-    {
-        return networkmanager.writeThread;
-    }
+		}
+	}
 
-    public static final Object threadSyncObject = new Object();
-    public static int numReadThreads;
-    public static int numWriteThreads;
-    private Object sendQueueLock;
-    private Socket networkSocket;
-    private final SocketAddress field_12032_f;
-    private DataInputStream socketInputStream;
-    private DataOutputStream socketOutputStream;
-    private boolean isRunning;
-    private List readPackets;
-    private List dataPackets;
-    private List chunkDataPackets;
-    private NetHandler netHandler;
-    private boolean isServerTerminating;
-    private Thread writeThread;
-    private Thread readThread;
-    private boolean isTerminating;
-    private String terminationReason;
-    private int timeSinceLastRead;
-    private int sendQueueByteLength;
-    private int chunkDataSendCounter;
+	public void processReadPackets() {
+		if(this.sendQueueByteLength > 1048576) {
+			this.networkShutdown("Send buffer overflow");
+		}
 
+		if(this.readPackets.isEmpty()) {
+			if(this.timeSinceLastRead++ == 1200) {
+				this.networkShutdown("Timed out");
+			}
+		} else {
+			this.timeSinceLastRead = 0;
+		}
+
+		int var1 = 100;
+
+		while(!this.readPackets.isEmpty() && var1-- >= 0) {
+			Packet var2 = (Packet)this.readPackets.remove(0);
+			var2.processPacket(this.netHandler);
+		}
+
+		if(this.isTerminating && this.readPackets.isEmpty()) {
+			this.netHandler.handleErrorMessage(this.terminationReason);
+		}
+
+	}
+
+	public SocketAddress getRemoteAddress() {
+		return this.field_12032_f;
+	}
+
+	public void serverShutdown() {
+		this.isServerTerminating = true;
+		this.readThread.interrupt();
+		(new ThreadMonitorConnection(this)).start();
+	}
+
+	public int getNumChunkDataPackets() {
+		return this.chunkDataPackets.size();
+	}
+
+	static boolean isRunning(NetworkManager var0) {
+		return var0.isRunning;
+	}
+
+	static boolean isServerTerminating(NetworkManager var0) {
+		return var0.isServerTerminating;
+	}
+
+	static void readNetworkPacket(NetworkManager var0) {
+		var0.readPacket();
+	}
+
+	static void sendNetworkPacket(NetworkManager var0) {
+		var0.sendPacket();
+	}
+
+	static Thread getReadThread(NetworkManager var0) {
+		return var0.readThread;
+	}
+
+	static Thread getWriteThread(NetworkManager var0) {
+		return var0.writeThread;
+	}
 }

@@ -1,33 +1,22 @@
 package net.minecraft.src;
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3) braces deadcode 
 
+class ThreadMonitorConnection extends Thread {
+	final NetworkManager netManager;
 
-class ThreadMonitorConnection extends Thread
-{
+	ThreadMonitorConnection(NetworkManager var1) {
+		this.netManager = var1;
+	}
 
-    ThreadMonitorConnection(NetworkManager networkmanager)
-    {
-        netManager = networkmanager;
-    }
+	public void run() {
+		try {
+			Thread.sleep(2000L);
+			if(NetworkManager.isRunning(this.netManager)) {
+				NetworkManager.getWriteThread(this.netManager).interrupt();
+				this.netManager.networkShutdown("Connection closed");
+			}
+		} catch (Exception var2) {
+			var2.printStackTrace();
+		}
 
-    public void run()
-    {
-        try
-        {
-            Thread.sleep(2000L);
-            if(NetworkManager.isRunning(netManager))
-            {
-                NetworkManager.getWriteThread(netManager).interrupt();
-                netManager.networkShutdown("Connection closed");
-            }
-        }
-        catch(Exception exception)
-        {
-            ExceptionLogger.log(exception);
-        }
-    }
-
-    final NetworkManager netManager; /* synthetic field */
+	}
 }

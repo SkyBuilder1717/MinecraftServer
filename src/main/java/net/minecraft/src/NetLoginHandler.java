@@ -1,156 +1,118 @@
 package net.minecraft.src;
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3) braces deadcode 
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Random;
 import java.util.logging.Logger;
-import net.minecraft.server.*;
+import net.minecraft.server.MinecraftServer;
 
-public class NetLoginHandler extends NetHandler
-{
+public class NetLoginHandler extends NetHandler {
+	public static Logger logger = Logger.getLogger("Minecraft");
+	private static Random rand = new Random();
+	public NetworkManager netManager;
+	public boolean finishedProcessing = false;
+	public MinecraftServer mcServer;
+	private int field_9005_f = 0;
+	private String username = null;
+	private Packet1Login field_9004_h = null;
+	private String serverId = "";
 
-    public NetLoginHandler(MinecraftServer minecraftserver, Socket socket, String s) throws IOException
-    {
-        finishedProcessing = false;
-        field_9005_f = 0;
-        username = null;
-        field_9004_h = null;
-        serverId = "";
-        mcServer = minecraftserver;
-        netManager = new NetworkManager(socket, s, this);
-    }
+	public NetLoginHandler(MinecraftServer var1, Socket var2, String var3) throws IOException {
+		this.mcServer = var1;
+		this.netManager = new NetworkManager(var2, var3, this);
+	}
 
-    public void tryLogin()
-    {
-        if(field_9004_h != null)
-        {
-            doLogin(field_9004_h);
-            field_9004_h = null;
-        }
-        if(field_9005_f++ == 600)
-        {
-            kickUser("Took too long to log in");
-        } else
-        {
-            netManager.processReadPackets();
-        }
-    }
+	public void tryLogin() {
+		if(this.field_9004_h != null) {
+			this.doLogin(this.field_9004_h);
+			this.field_9004_h = null;
+		}
 
-    public void kickUser(String s)
-    {
-        try
-        {
-            logger.info((new StringBuilder()).append("Disconnecting ").append(getUserAndIPString()).append(": ").append(s).toString());
-            netManager.addToSendQueue(new Packet255KickDisconnect(s));
-            for (EventListener l : mcServer.pluginManager.getListeners()) {
-                l.onPlayerKick(username, s);
-            }
-            netManager.serverShutdown();
-            finishedProcessing = true;
-        }
-        catch(Exception exception)
-        {
-            ExceptionLogger.log(exception);
-        }
-    }
+		if(this.field_9005_f++ == 600) {
+			this.kickUser("Took too long to log in");
+		} else {
+			this.netManager.processReadPackets();
+		}
 
-    public void handleHandshake(Packet2Handshake packet2handshake)
-    {
-        if(mcServer.onlineMode)
-        {
-            serverId = Long.toHexString(rand.nextLong());
-            netManager.addToSendQueue(new Packet2Handshake(serverId));
-        } else
-        {
-            netManager.addToSendQueue(new Packet2Handshake("-"));
-        }
-    }
+	}
 
-    public void handleLogin(Packet1Login packet1login)
-    {
-        username = packet1login.username;
-        if(packet1login.protocolVersion != 6)
-        {
-            if(packet1login.protocolVersion > 6)
-            {
-                kickUser("Outdated server!");
-            } else
-            {
-                kickUser("Outdated client!");
-            }
-            return;
-        }
-        if(!mcServer.onlineMode)
-        {
-            doLogin(packet1login);
-        } else
-        {
-            (new ThreadLoginVerifier(this, packet1login)).start();
-        }
-    }
+	public void kickUser(String var1) {
+		try {
+			logger.info("Disconnecting " + this.getUserAndIPString() + ": " + var1);
+			this.netManager.addToSendQueue(new Packet255KickDisconnect(var1));
+			this.netManager.serverShutdown();
+			this.finishedProcessing = true;
+		} catch (Exception var3) {
+			var3.printStackTrace();
+		}
 
-    public void doLogin(Packet1Login packet1login)
-    {
-        EntityPlayerMP entityplayermp = mcServer.configManager.login(this, packet1login.username, packet1login.password);
-        if(entityplayermp != null)
-        {
-            logger.info((new StringBuilder()).append(getUserAndIPString()).append(" logged in with entity id ").append(entityplayermp.field_331_c).toString());
-            NetServerHandler netserverhandler = new NetServerHandler(mcServer, netManager, entityplayermp);
-            netserverhandler.sendPacket(new Packet1Login("", "", entityplayermp.field_331_c, mcServer.worldMngr.randomSeed, (byte)mcServer.worldMngr.field_4272_q.field_6165_g));
-            netserverhandler.sendPacket(new Packet6SpawnPosition(mcServer.worldMngr.spawnX, mcServer.worldMngr.spawnY, mcServer.worldMngr.spawnZ));
-            mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat((new StringBuilder()).append("\247e").append(entityplayermp.username).append(" joined the game.").toString()));
-            mcServer.configManager.playerLoggedIn(entityplayermp);
-            netserverhandler.func_41_a(entityplayermp.posX, entityplayermp.posY, entityplayermp.posZ, entityplayermp.rotationYaw, entityplayermp.rotationPitch);
-            netserverhandler.func_40_d();
-            mcServer.field_6036_c.func_4108_a(netserverhandler);
-            netserverhandler.sendPacket(new Packet4UpdateTime(mcServer.worldMngr.worldTime));
-        }
-        finishedProcessing = true;
-    }
+	}
 
-    public void handleErrorMessage(String s)
-    {
-        logger.info((new StringBuilder()).append(getUserAndIPString()).append(" lost connection").toString());
-        finishedProcessing = true;
-    }
+	public void handleHandshake(Packet2Handshake var1) {
+		if(this.mcServer.onlineMode) {
+			this.serverId = Long.toHexString(rand.nextLong());
+			this.netManager.addToSendQueue(new Packet2Handshake(this.serverId));
+		} else {
+			this.netManager.addToSendQueue(new Packet2Handshake("-"));
+		}
 
-    public void func_6001_a(Packet packet)
-    {
-        kickUser("Protocol error");
-    }
+	}
 
-    public String getUserAndIPString()
-    {
-        if(username != null)
-        {
-            return (new StringBuilder()).append(username).append(" [").append(netManager.getRemoteAddress().toString()).append("]").toString();
-        } else
-        {
-            return netManager.getRemoteAddress().toString();
-        }
-    }
+	public void handleLogin(Packet1Login var1) {
+		this.username = var1.username;
+		if(var1.protocolVersion != 6) {
+			if(var1.protocolVersion > 6) {
+				this.kickUser("Outdated server!");
+			} else {
+				this.kickUser("Outdated client!");
+			}
 
-    static String getServerId(NetLoginHandler netloginhandler)
-    {
-        return netloginhandler.serverId;
-    }
+		} else {
+			if(!this.mcServer.onlineMode) {
+				this.doLogin(var1);
+			} else {
+				(new ThreadLoginVerifier(this, var1)).start();
+			}
 
-    static Packet1Login setLoginPacket(NetLoginHandler netloginhandler, Packet1Login packet1login)
-    {
-        return netloginhandler.field_9004_h = packet1login;
-    }
+		}
+	}
 
-    public static Logger logger = Logger.getLogger("Minecraft");
-    private static Random rand = new Random();
-    public NetworkManager netManager;
-    public boolean finishedProcessing;
-    public MinecraftServer mcServer;
-    private int field_9005_f;
-    private String username;
-    private Packet1Login field_9004_h;
-    private String serverId;
+	public void doLogin(Packet1Login var1) {
+		EntityPlayerMP var2 = this.mcServer.configManager.login(this, var1.username, var1.password);
+		if(var2 != null) {
+			logger.info(this.getUserAndIPString() + " logged in with entity id " + var2.field_331_c);
+			NetServerHandler var3 = new NetServerHandler(this.mcServer, this.netManager, var2);
+			var3.sendPacket(new Packet1Login("", "", var2.field_331_c, this.mcServer.worldMngr.randomSeed, (byte)this.mcServer.worldMngr.field_4272_q.field_6165_g));
+			var3.sendPacket(new Packet6SpawnPosition(this.mcServer.worldMngr.spawnX, this.mcServer.worldMngr.spawnY, this.mcServer.worldMngr.spawnZ));
+			this.mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat("\u00a7e" + var2.username + " joined the game."));
+			this.mcServer.configManager.playerLoggedIn(var2);
+			var3.func_41_a(var2.posX, var2.posY, var2.posZ, var2.rotationYaw, var2.rotationPitch);
+			var3.func_40_d();
+			this.mcServer.field_6036_c.func_4108_a(var3);
+			var3.sendPacket(new Packet4UpdateTime(this.mcServer.worldMngr.worldTime));
+		}
 
+		this.finishedProcessing = true;
+	}
+
+	public void handleErrorMessage(String var1) {
+		logger.info(this.getUserAndIPString() + " lost connection");
+		this.finishedProcessing = true;
+	}
+
+	public void func_6001_a(Packet var1) {
+		this.kickUser("Protocol error");
+	}
+
+	public String getUserAndIPString() {
+		return this.username != null ? this.username + " [" + this.netManager.getRemoteAddress().toString() + "]" : this.netManager.getRemoteAddress().toString();
+	}
+
+	static String getServerId(NetLoginHandler var0) {
+		return var0.serverId;
+	}
+
+	static Packet1Login setLoginPacket(NetLoginHandler var0, Packet1Login var1) {
+		return var0.field_9004_h = var1;
+	}
 }

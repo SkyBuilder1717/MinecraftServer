@@ -1,36 +1,49 @@
 package net.minecraft.src;
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3) braces deadcode 
 
+class NetworkReaderThread extends Thread {
+	final NetworkManager netManager;
 
-class NetworkReaderThread extends Thread
-{
+	NetworkReaderThread(NetworkManager var1, String var2) {
+		super(var2);
+		this.netManager = var1;
+	}
 
-    NetworkReaderThread(NetworkManager networkmanager, String s)
-    {
-        super(s);
-        netManager = networkmanager;
-    }
+	public void run() {
+		Object var1 = NetworkManager.threadSyncObject;
+		synchronized(var1) {
+			++NetworkManager.numReadThreads;
+		}
 
-    public void run()
-    {
-        synchronized(NetworkManager.threadSyncObject)
-        {
-            NetworkManager.numReadThreads++;
-        }
-        try
-        {
-            for(; NetworkManager.isRunning(netManager) && !NetworkManager.isServerTerminating(netManager); NetworkManager.readNetworkPacket(netManager)) { }
-        }
-        finally
-        {
-            synchronized(NetworkManager.threadSyncObject)
-            {
-                NetworkManager.numReadThreads--;
-            }
-        }
-    }
+		while(true) {
+			boolean var11 = false;
 
-    final NetworkManager netManager; /* synthetic field */
+			try {
+				var11 = true;
+				if(NetworkManager.isRunning(this.netManager)) {
+					if(!NetworkManager.isServerTerminating(this.netManager)) {
+						NetworkManager.readNetworkPacket(this.netManager);
+						continue;
+					}
+
+					var11 = false;
+					break;
+				}
+
+				var11 = false;
+				break;
+			} finally {
+				if(var11) {
+					Object var5 = NetworkManager.threadSyncObject;
+					synchronized(var5) {
+						--NetworkManager.numReadThreads;
+					}
+				}
+			}
+		}
+
+		var1 = NetworkManager.threadSyncObject;
+		synchronized(var1) {
+			--NetworkManager.numReadThreads;
+		}
+	}
 }

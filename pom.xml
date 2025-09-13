@@ -11,8 +11,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>8</java.version>
+        <java.version>11</java.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -30,8 +31,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -61,7 +62,11 @@
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
-                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>log4j2.xml</exclude>
+                                        <exclude>META-INF/DEPENDENCIES</exclude>
+                                        <exclude>META-INF/LICENSE</exclude>
+                                        <exclude>META-INF/NOTICE</exclude>
+                                        <exclude>META-INF/versions/9/module-info.class</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -89,7 +94,7 @@
                 <configuration>
                     <injar>server.jar</injar>
                     <outjar>server-obf.jar</outjar>
-                    <libs>${java.home}/lib/rt.jar</libs>
+                    <libs>C:/Program Files/Java/jre1.8.0_461/lib/rt.jar</libs>
                     <options>
                         <option>-dontwarn</option>
                         <option>-keep public class net.minecraft.server.MinecraftServer { public static void main(java.lang.String[]); }</option>

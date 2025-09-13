@@ -1,23 +1,16 @@
 package net.minecraft.src;
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3) braces deadcode 
 
 import net.minecraft.server.MinecraftServer;
 
-public final class ThreadServerApplication extends Thread
-{
+public final class ThreadServerApplication extends Thread {
+	final MinecraftServer mcServer;
 
-    public ThreadServerApplication(String s, MinecraftServer minecraftserver)
-    {
-        super(s);
-        mcServer = minecraftserver;
-    }
+	public ThreadServerApplication(String var1, MinecraftServer var2) {
+		super(var1);
+		this.mcServer = var2;
+	}
 
-    public void run()
-    {
-        mcServer.run();
-    }
-
-    final MinecraftServer mcServer; /* synthetic field */
+	public void run() {
+		this.mcServer.run();
+	}
 }
