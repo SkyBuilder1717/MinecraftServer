@@ -1,9 +1,7 @@
 package net.minecraft.server.commands;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.src.EntityPlayerMP;
 import net.minecraft.src.ICommandListener;
-
 import java.util.Objects;
 
 public class WhitelistCommand implements ICommand {
@@ -23,7 +21,7 @@ public class WhitelistCommand implements ICommand {
                 server.configManager.whitelistPlayer(player);
                 sender.log("Whitelisted: " + player);
             } else if (Objects.equals(action, "remove")) {
-                server.configManager.whitelistPlayer(player);
+                server.configManager.removeWhitelistPlayer(player);
                 sender.log("Removed from whitelist: " + player);
             }
             return;

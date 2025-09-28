@@ -12,7 +12,7 @@ public class BlockRedstoneTorch extends BlockTorch
     {
         if(flag)
         {
-            torchUpdates.add(new RedstoneUpdateInfo(i, j, k, world.worldTime));
+            torchUpdates.add(new RedstoneUpdateInfo(i, j, k, world.getWorldTime()));
         }
         int l = 0;
         for(int i1 = 0; i1 < torchUpdates.size(); i1++)
@@ -121,7 +121,7 @@ public class BlockRedstoneTorch extends BlockTorch
     public void updateTick(World world, int i, int j, int k, Random random)
     {
         boolean flag = func_15001_g(world, i, j, k);
-        for(; torchUpdates.size() > 0 && world.worldTime - ((RedstoneUpdateInfo)torchUpdates.get(0)).field_776_d > 100L; torchUpdates.remove(0)) { }
+        for(; torchUpdates.size() > 0 && world.getWorldTime() - ((RedstoneUpdateInfo)torchUpdates.get(0)).field_776_d > 100L; torchUpdates.remove(0)) { }
         if(torchActive)
         {
             if(flag)

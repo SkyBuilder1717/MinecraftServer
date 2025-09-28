@@ -104,7 +104,7 @@ public class ChunkProviderLoadOrGenerate
             Chunk chunk = field_721_e.func_659_a(worldObj, i, j);
             if(chunk != null)
             {
-                chunk.field_676_s = worldObj.worldTime;
+                chunk.field_676_s = worldObj.getWorldTime();
             }
             return chunk;
         }
@@ -139,7 +139,7 @@ public class ChunkProviderLoadOrGenerate
         }
         try
         {
-            chunk.field_676_s = worldObj.worldTime;
+            chunk.field_676_s = worldObj.getWorldTime();
             field_721_e.func_662_a(worldObj, chunk);
         }
         catch(IOException ioexception)

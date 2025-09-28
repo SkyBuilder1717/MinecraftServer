@@ -2016,6 +2016,22 @@ public class World
         }
     }
 
+    public void setWorldTime(long time) {
+        worldTime = time;
+    }
+
+    public void addWorldTime(long time) {
+        worldTime += time;
+    }
+
+    public void removeWorldTime(long time) {
+        worldTime -= time;
+    }
+
+    public long getWorldTime() {
+        return worldTime;
+    }
+
     public boolean field_4280_a;
     private List field_821;
     public List field_815_a;
@@ -2024,7 +2040,7 @@ public class World
     private Set scheduledTickSet;
     public List field_814_b;
     public List<EntityPlayerMP> playerEntities;
-    public long worldTime;
+    private long worldTime;
     private long field_6159_E;
     public int skylightSubtracted;
     protected int field_4279_g;

@@ -115,7 +115,7 @@ public class ChunkProviderServer
             Chunk chunk = field_729_d.func_659_a(field_726_g, i, j);
             if(chunk != null)
             {
-                chunk.field_676_s = field_726_g.worldTime;
+                chunk.field_676_s = field_726_g.getWorldTime();
             }
             return chunk;
         }
@@ -150,7 +150,7 @@ public class ChunkProviderServer
         }
         try
         {
-            chunk.field_676_s = field_726_g.worldTime;
+            chunk.field_676_s = field_726_g.getWorldTime();
             field_729_d.func_662_a(field_726_g, chunk);
         }
         catch(IOException ioexception)

@@ -9,7 +9,9 @@ import net.minecraft.server.commands.*;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.logging.Level;
@@ -63,6 +65,23 @@ public class MinecraftServer
 
     }
 
+    private static String getPublicIP() {
+        try {
+            URL url = new URL("https://api.ipify.org");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(3000);
+            conn.setReadTimeout(3000);
+            java.io.BufferedReader in = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(conn.getInputStream())
+            );
+            String ip = in.readLine();
+            in.close();
+            return ip;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private boolean host_started() throws UnknownHostException
     {
         ThreadCommandReader threadcommandreader = new ThreadCommandReader(this);
@@ -77,22 +96,25 @@ public class MinecraftServer
         }
         logger.info("Loading properties");
         propertyManagerObj = new PropertyManager(new File("server.properties"));
-        String s = propertyManagerObj.getStringProperty("server-ip", "");
+        serverIp = propertyManagerObj.getStringProperty("server-ip", "");
+        motd = propertyManagerObj.getStringProperty("motd", "Minecraft Server");
         onlineMode = propertyManagerObj.getBooleanProperty("online-mode", true);
+        announceServer = propertyManagerObj.getBooleanProperty("announce-server", false);
         spawnProtection = propertyManagerObj.getIntProperty("spawn-protection", 16);
         noAnimals = propertyManagerObj.getBooleanProperty("spawn-animals", true);
         whiteList = propertyManagerObj.getBooleanProperty("whitelist", false);
         if (whiteList) ServerCommands.register("whitelist", new WhitelistCommand());
         InetAddress inetaddress = null;
-        if(!s.isEmpty())
+        if(!serverIp.isEmpty())
         {
-            inetaddress = InetAddress.getByName(s);
+            inetaddress = InetAddress.getByName(serverIp);
         }
-        int i = propertyManagerObj.getIntProperty("server-port", 25565);
-        logger.info("Starting Minecraft server on " + (!s.isEmpty() ? s : "*") + ":" + i);
+        port = propertyManagerObj.getIntProperty("server-port", 25565);
+        publicIp = getPublicIP();
+        logger.info("Starting Minecraft server on " + (!serverIp.isEmpty() ? serverIp : "*") + ":" + port);
         try
         {
-            field_6036_c = new NetworkListenThread(this, inetaddress, i);
+            field_6036_c = new NetworkListenThread(this, inetaddress, port);
         }
         catch(IOException ioexception)
         {
@@ -253,12 +275,13 @@ public class MinecraftServer
         ticks++;
         if (ticks % 20 == 0) {
             configManager.sendPacketToAllPlayers(
-                    new Packet4UpdateTime(worldMngr.worldTime)
+                    new Packet4UpdateTime(worldMngr.getWorldTime())
             );
         }
         worldMngr.tick();
         while(worldMngr.func_6156_d()) ;
         worldMngr.func_459_b();
+        if (announceServer) AnnounceServer.tick(this.motd, configManager.playerEntities.size(), configManager.maxPlayers, (!serverIp.isEmpty() ? serverIp : publicIp) + ":" + this.port);
         field_6036_c.func_715_a();
         configManager.func_637_b();
         field_6028_k.func_607_a();
@@ -355,11 +378,16 @@ public class MinecraftServer
     int ticks;
     public String loadingMessage;
     public int generationPercentage;
+    public int port;
+    public String serverIp;
+    public String publicIp;
+    public String motd;
     private final List<IUpdatePlayerListBox> field_9010_p;
     public EntityTracker field_6028_k;
     public boolean onlineMode;
     public boolean noAnimals;
     public boolean whiteList;
+    public boolean announceServer;
     public final HashMap<EntityPlayer, Boolean> vanishedPlayers = new HashMap<>();
     public static MinecraftServer instance;
 }

@@ -9,7 +9,7 @@ public class TimeCommand implements ICommand {
     @Override
     public void execute(MinecraftServer server, ICommandListener sender, String[] args) {
         World world = server.worldMngr;
-        long ticks = world.worldTime % 24000;
+        long ticks = world.getWorldTime() % 24000;
         int totalMinutes = (int) (ticks * 60 / 1000);
         int hours = (6 + totalMinutes / 60) % 24;
         int minutes = totalMinutes % 60;
@@ -23,11 +23,11 @@ public class TimeCommand implements ICommand {
                         String[] hm = arg.split(":");
                         int h = Integer.parseInt(hm[0]);
                         int m = Integer.parseInt(hm[1]);
-                        world.worldTime = ((h - 6 + 24) % 24) * 1000 + (m * 1000L / 60);
+                        world.setWorldTime(((h - 6 + 24) % 24) * 1000 + (m * 1000L / 60));
                         sender.log("Time set to: " + String.format("%02d:%02d", h, m));
                     } else {
                         long time = Long.parseLong(arg);
-                        world.worldTime = time;
+                        world.setWorldTime(time);
                         sender.log("Time set to: " + time);
                     }
                 } catch (NumberFormatException e) {

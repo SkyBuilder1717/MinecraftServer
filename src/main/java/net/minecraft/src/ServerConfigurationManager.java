@@ -510,7 +510,7 @@ public class ServerConfigurationManager
     public List<EntityPlayerMP> playerEntities;
     private MinecraftServer mcServer;
     private PlayerManager playerManagerObj;
-    private int maxPlayers;
+    public int maxPlayers;
     private Set bannedPlayers;
     private Set whiteListedPlayers;
     private Set bannedIPs;

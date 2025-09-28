@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Random;
 import java.util.logging.Logger;
+
+import net.minecraft.server.EventListener;
 import net.minecraft.server.MinecraftServer;
 
 public class NetLoginHandler extends NetHandler {
@@ -39,6 +41,9 @@ public class NetLoginHandler extends NetHandler {
 	public void kickUser(String var1) {
 		try {
 			logger.info("Disconnecting " + this.getUserAndIPString() + ": " + var1);
+            for (EventListener l : mcServer.pluginManager.getListeners()) {
+                l.onPlayerKick(this.username, var1);
+            }
 			this.netManager.addToSendQueue(new Packet255KickDisconnect(var1));
 			this.netManager.serverShutdown();
 			this.finishedProcessing = true;
@@ -89,14 +94,13 @@ public class NetLoginHandler extends NetHandler {
 			var3.func_41_a(var2.posX, var2.posY, var2.posZ, var2.rotationYaw, var2.rotationPitch);
 			var3.func_40_d();
 			this.mcServer.field_6036_c.func_4108_a(var3);
-			var3.sendPacket(new Packet4UpdateTime(this.mcServer.worldMngr.worldTime));
+			var3.sendPacket(new Packet4UpdateTime(this.mcServer.worldMngr.getWorldTime()));
 		}
 
 		this.finishedProcessing = true;
 	}
 
 	public void handleErrorMessage(String var1) {
-		logger.info(this.getUserAndIPString() + " lost connection");
 		this.finishedProcessing = true;
 	}
 

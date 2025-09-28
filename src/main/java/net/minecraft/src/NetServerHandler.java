@@ -1,6 +1,8 @@
 package net.minecraft.src;
 
 import java.util.logging.Logger;
+
+import net.minecraft.server.EventListener;
 import net.minecraft.server.MinecraftServer;
 
 public class NetServerHandler extends NetHandler implements ICommandListener {
@@ -33,10 +35,12 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 	}
 
 	public void func_43_c(String var1) {
-		this.netManager.addToSendQueue(new Packet255KickDisconnect(var1));
-		this.netManager.serverShutdown();
-		this.mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat("\u00a7e" + this.playerEntity.username + " left the game."));
-		this.mcServer.configManager.playerLoggedOut(this.playerEntity);
+        this.netManager.addToSendQueue(new Packet255KickDisconnect(var1));
+        this.netManager.serverShutdown();
+        if (this.mcServer.configManager.isVanished(this.playerEntity)) {
+            this.mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat("\u00a7e" + this.playerEntity.username + " left the game."));
+        }
+        this.mcServer.configManager.playerLoggedOut(this.playerEntity);
 		this.field_18_c = true;
 	}
 
@@ -119,6 +123,10 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 				}
 
 				this.playerEntity.field_418_ai = var1.stance;
+
+                for (EventListener l : mcServer.pluginManager.getListeners()) {
+                    l.onPlayerMove(this.playerEntity, var4, var6, var8);
+                }
 			}
 
 			if(var1.rotating) {
@@ -210,6 +218,10 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 			var19 = var8;
 		}
 
+        for (EventListener l : mcServer.pluginManager.getListeners()) {
+            l.onBlockBreak(this.playerEntity, var4, var5, var6, var18);
+        }
+
 		if(var1.status == 0) {
 			if(var19 > 16 || var2) {
 				this.playerEntity.field_425_ad.func_324_a(var4, var5, var6);
@@ -243,6 +255,9 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 			int var4 = var1.yPosition;
 			int var5 = var1.zPosition;
 			int var6 = var1.direction;
+            for (EventListener l : mcServer.pluginManager.getListeners()) {
+                l.onBlockPlace(this.playerEntity, var10, var4, var5, var1.id, var1.direction);
+            }
 			int var7 = (int)MathHelper.abs((float)(var10 - this.mcServer.worldMngr.spawnX));
 			int var8 = (int)MathHelper.abs((float)(var5 - this.mcServer.worldMngr.spawnZ));
 			if(var7 > var8) {
@@ -344,6 +359,9 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
 				this.func_4010_d(var2);
 			} else {
 				var2 = "<" + this.playerEntity.username + "> " + var2;
+                for (EventListener l : mcServer.pluginManager.getListeners()) {
+                    l.onPlayerChat(this.playerEntity, var2);
+                }
 				logger.info(var2);
 				this.mcServer.configManager.sendPacketToAllPlayers(new Packet3Chat(var2));
 			}

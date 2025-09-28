@@ -1,7 +1,7 @@
 package net.minecraft.src;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import net.minecraft.server.*;
+import java.io.*;
 import java.net.URL;
 
 class ThreadLoginVerifier extends Thread {
@@ -22,6 +22,9 @@ class ThreadLoginVerifier extends Thread {
 			var3.close();
 			if(var4.equals("YES")) {
 				NetLoginHandler.setLoginPacket(this.loginHandler, this.loginPacket);
+                for (EventListener l : loginHandler.mcServer.pluginManager.getListeners()) {
+                    l.onPlayerLogin(this.loginPacket.username);
+                }
 			} else {
 				this.loginHandler.kickUser("Failed to verify username!");
 			}

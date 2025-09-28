@@ -578,7 +578,7 @@ public class Chunk
         {
             return false;
         }
-        if(field_677_r && worldObj.worldTime != field_676_s)
+        if(field_677_r && worldObj.getWorldTime() != field_676_s)
         {
             return true;
         } else

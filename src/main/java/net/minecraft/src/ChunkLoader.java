@@ -126,7 +126,7 @@ public class ChunkLoader
         world.func_476_g();
         nbttagcompound.setInteger("xPos", chunk.xPosition);
         nbttagcompound.setInteger("zPos", chunk.zPosition);
-        nbttagcompound.setLong("LastUpdate", world.worldTime);
+        nbttagcompound.setLong("LastUpdate", world.getWorldTime());
         nbttagcompound.setByteArray("Blocks", chunk.blocks);
         nbttagcompound.setByteArray("Data", chunk.data.data);
         nbttagcompound.setByteArray("SkyLight", chunk.skylightMap.data);
